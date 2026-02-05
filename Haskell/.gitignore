@@ -1,0 +1,15 @@
+# Stack build artifacts
+.stack-work/
+*.cabal~
+
+# GHC
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/

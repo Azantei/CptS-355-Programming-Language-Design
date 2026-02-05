@@ -2,3 +2,5 @@ cradle:
   stack:
     - path: "./Assignment-1"
       component: "hw1:lib"
+    - path: "./Assignment-2"
+      component: "hw2:lib"
