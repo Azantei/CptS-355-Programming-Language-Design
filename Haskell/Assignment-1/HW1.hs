@@ -1,7 +1,11 @@
--- CptS 355 - Spring 2026 Assignment 1
--- Please include your name and the names of the students with whom you discussed any of the problems in this homework
--- Name: Camille Orego
--- Helpers: Claude Sonnet 4.5 (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design)
+{- 
+CptS 355 - Spring 2026 Assignment 1
+Please include your name and the names of the students with whom you discussed any of the problems in this homework
+Name: Camille Orego
+GitHub Repo: https://github.com/Azantei/CptS-355-Programming-Language-Design
+Helpers: Claude Sonnet 4.5 
+        (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design/tree/main/Haskell/Assignment-1/Logs)
+-}
 
 module HW1
      where
