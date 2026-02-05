@@ -46,12 +46,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\bin"
-libdir     = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\lib\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0-GgeyDOqw6MkJZVZMAhRb2n"
-dynlibdir  = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\lib\\x86_64-windows-ghc-9.10.3-b42a"
-datadir    = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\share\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0"
-libexecdir = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\libexec\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0"
-sysconfdir = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\8a56b9a9\\etc"
+bindir     = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\bin"
+libdir     = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\lib\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0-GgeyDOqw6MkJZVZMAhRb2n"
+dynlibdir  = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\lib\\x86_64-windows-ghc-9.10.3-b42a"
+datadir    = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\share\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0"
+libexecdir = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\libexec\\x86_64-windows-ghc-9.10.3-b42a\\hw1-0.1.0.0"
+sysconfdir = "C:\\Users\\azant\\Documents\\School\\CptS_355\\Assigment_1\\Haskell\\.stack-work\\install\\7b78a46a\\etc"
 
 getBinDir     = catchIO (getEnv "hw1_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "hw1_libdir")     (\_ -> return libdir)

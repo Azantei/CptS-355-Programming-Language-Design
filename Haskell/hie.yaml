@@ -1,0 +1,4 @@
+cradle:
+  stack:
+    - path: "./Assignment-1"
+      component: "hw1:lib"
