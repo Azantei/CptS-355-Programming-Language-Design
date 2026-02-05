@@ -1,0 +1,587 @@
+Cpts355_Assignment1_Haskell1_Spr26.pdf237 linespdfomg what am I doing for this assignmnet. 7 pages of assignment, ughFeb 3I can see this is a Haskell programming assignment with 6 problems! Let me break down what you need to do:
+Overview
+
+Due: Friday, February 6, 2026
+Weight: 5% of your grade
+Files to submit: HW1.hs (your solutions) and HW1Tests.hs (your tests)
+
+The 6 Problems:
+
+exists (10%) - Check if a value is in a list
+listUnion (15%) - Return the union of two lists (no duplicates)
+replace (15%) - Replace the nth element in a list with a new value
+prereqFor (20%) - Find courses that require a given course as a prerequisite
+isPalindrome (20%) - Check if a string is a palindrome (ignoring spaces/case)
+groupSumtoN (20%) - Group consecutive list elements into sublists that sum to ≤ N
+
+Key Requirements:
+
+Must use recursive definitions (no external libraries)
+Helper functions must be local (in let..in or where blocks)
+Function names and types must match exactly what's specified
+Add at least 2 more test cases per problem (on top of the 3 provided)
+Good style: indentation, comments, clean code
+
+Getting Started:
+
+Download the HW1.hs and HW1Tests.hs files from your course
+Install HUnit for testing (instructions in the PDF)
+Write your functions recursively
+Add your test cases
+Test on command line with GHC
+
+Want help understanding any specific problem or getting started with the code?Jesus ok so I downloaded the files. I will use them on my visual studio code so I have that in a folder and it's yelling at me that I need GHCup. SO i went to install it and now it's like "Do you want Code to open the external website" and it's haskell.org/ghcupFeb 3Yes, go ahead and click "Open" or "Allow" to open that website!
+GHCup is the official Haskell installer/toolchain manager - it's legit and exactly what you need. The haskell.org/ghcup site will give you instructions to install:
+
+GHC (the Haskell compiler)
+cabal (package manager)
+HLS (Haskell Language Server - this is what VS Code uses for syntax highlighting, error checking, etc.)
+
+Quick install:
+On Windows: You'll likely download and run an installer
+On Mac/Linux: You'll probably copy-paste a command into your terminal like:
+bashcurl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+Once installed, restart VS Code and the errors should go away. The Haskell extension in VS Code will then be able to help you with syntax highlighting, autocomplete, and inline error messages.
+Let me know if you hit any snags during installation!how do i know this is done installingFeb 3Good question! Here's how to tell if GHCup finished installing:
+Check the terminal/command prompt window:
+Look for messages like:
+
+"Installation complete"
+"All done!"
+"GHCup installation finished successfully"
+It might ask you to restart your terminal or add something to your PATH
+
+The prompt should return - you'll see your normal command prompt again (like C:\Users\YourName> on Windows or $ on Mac/Linux) instead of installation messages scrolling by
+Test if it worked:
+Open a new terminal/command prompt window and type:
+bashghc --version
+```
+
+If you see something like:
+```
+The Glorious Glasgow Haskell Compilation System, version 9.x.x
+You're good! ✅
+Also try:
+bashghci
+This should open the interactive Haskell interpreter. You'll see a Prelude> prompt. Type :quit to exit.
+In VS Code:
+After GHCup installs, close and reopen VS Code. The red error messages about needing GHCup should disappear.
+How's it looking so far?so it says it's installed but the installer is frozen. I went to close it and it yelled at me that it's still running processesFeb 3Don't force close it yet! Even though it says "installed," GHCup is probably still doing some cleanup work in the background. Here's what to do:
+Wait a bit longer:
+
+GHCup often has a post-installation phase where it:
+
+Sets up environment variables
+Compiles some packages
+Configures the toolchain
+
+
+This can take 5-10 minutes sometimes (especially the first time)
+
+What to look for:
+
+Check if there's a progress bar still moving
+Look at the terminal output - is text still appearing, even slowly?
+Check your CPU usage (Task Manager on Windows / Activity Monitor on Mac) - if the installer process is using CPU, it's still working
+
+If it's genuinely frozen (like 15+ minutes with no activity):
+
+Check if there's a log file or output window showing what it's doing
+Look for any error messages in red
+Take a screenshot of where it's stuck - that helps diagnose
+
+Meanwhile, you can test:
+Open a new, separate terminal window (don't close the installer) and try:
+bashghc --version
+If that works, the important stuff is already installed, and the installer might just be doing optional cleanup.
+What does the installer window currently say? Any specific messages or progress indicators?OK! Installed. Now what? Am I just supposed to start making functions? Using existing functions wtfFeb 3Haha yes, welcome to functional programming! Let me get you started:
+First, open your HW1.hs file in VS Code
+You should see a template structure. You'll be writing functions using recursion and Haskell's basic built-in functions.
+Key Haskell basics you'll need:
+Pattern matching on lists:
+haskellmyFunction [] = ... -- base case: empty list
+myFunction (x:xs) = ... -- recursive case: x is head, xs is tail
+Useful built-in functions you CAN use:
+
+head - first element
+tail - rest of the list
+(x:xs) - cons operator (add x to front of list xs)
+++ - concatenate lists
+== - equality check
+reverse - reverse a list
+toUpper - uppercase a character (need to import for problem 5)
+
+Let's start with Problem 1 (exists):
+haskellexists :: Eq t => t -> [t] -> Bool
+exists value [] = False  -- base case: empty list
+exists value (x:xs) 
+    | value == x = True   -- found it!
+    | otherwise = exists value xs  -- keep searching
+That's it! You're using:
+
+Pattern matching ([] and (x:xs))
+Guards (the | symbols)
+Recursion (calling exists again on the tail)
+
+Want me to help you understand this pattern better, or should we tackle one of the problems together?Um I'd like to TRY and at least talk through it without being given the answer. Is "--" a comment?Feb 3YES! -- is a single-line comment in Haskell.
+haskell-- This is a comment
+
+{- This is a 
+   multi-line comment -}
+Good instinct to figure it out yourself! Let me help you talk through Problem 1 without giving you the answer:
+Problem 1: exists
+What it needs to do:
+
+Take a value and a list
+Return True if the value is in the list, False otherwise
+
+Think through it:
+
+What happens if the list is empty? (Base case)
+What if the list has elements? Check the first element:
+
+Does it match what you're looking for?
+If not, what should you do with the rest of the list?
+
+
+
+Haskell pattern matching hints:
+
+[] matches an empty list
+(x:xs) matches a non-empty list where x is the first element and xs is everything else
+
+Questions to consider:
+
+How do you compare two values for equality in Haskell? (hint: ==)
+How do you call your function again on a smaller version of the problem?
+
+Try writing the function signature first:
+haskellexists :: Eq t => t -> [t] -> Bool
+exists value list = ...
+What do you think the base case should return?So it looks like the assignment... Hold on let me give you the stuffs.Feb 3Yes! Go ahead and share the HW1.hs file contents with me. That way I can see the exact template/structure they gave you and help you work through it properly without accidentally giving you answers you want to figure out yourself.
+Paste away! 📋HW1Tests.hshsHW1.hshsIt looks like the name of the functions he wants us to do is in the assignmentFeb 3Let me check out what the instructor gave you!Viewed 3 filesReading the HW1.hs template file to see what structure is providedReading the HW1.hs file to see the template structureReading the HW1Tests.hs file to see the sample test casesDonePerfect! So yeah, you've got:
+HW1.hs - Just comments with section headers for each problem. You write your functions here.
+HW1Tests.hs - Already has 3-4 test cases per problem that you can run to check your work.
+Here's the structure:
+You'll write each function under its comment section in HW1.hs. For example, under -- 1. exists, you'd write:
+haskell-- 1. exists
+exists :: Eq t => t -> [t] -> Bool
+exists value [] = -- your code here
+exists value (x:xs) = -- your code here
+To test your code:
+
+Open a terminal in VS Code (Terminal → New Terminal)
+Type ghci to start the Haskell interactive interpreter
+Load your file: :load HW1.hs
+Test individual functions: exists 1 [1,2,3]
+Or load the test file: :load HW1Tests.hs
+Run all tests: run (or runTestTT tests)
+
+So for Problem 1 (exists), think about:
+
+What should exists 1 [] return? (empty list)
+What should exists 1 [1,2,3] do? (Check if 1 equals the first element, or keep searching the rest)
+
+Want to talk through the logic for exists without me giving you code?If the list is empty, it should return false, no?
+and that's the base case since it's reached the end of the list at that point.
+Otherwise (at least for regular programming), it's going to iterate through the list until it finds a value. But in Haskell, it's really not efficient but we COULD call the entire list recursively-- so hilariously enough I have like an "intellisense" extension for Haskell or whatever and it basically gave me the answer. XD
+So what if I wanted to use like an ... if/else statement equivalent. would it be:exists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs) = if
+     | value == x = True
+     | otherwise = exists value xsShow moreFeb 3Almost! You've got the right idea, but the syntax is a bit mixed up. In Haskell, you have a few options:
+Option 1: Guards (what you're trying to do - NO if keyword)
+haskellexists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs)
+     | value == x = True
+     | otherwise = exists value xs
+Notice: NO if before the |. The | symbol by itself starts guards.
+Option 2: Actual if-then-else
+haskellexists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs) = if value == x 
+                      then True 
+                      else exists value xs
+Option 3: Pattern matching directly on equality (less common here)
+haskellexists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs) 
+    | value == x = True
+    | otherwise = exists value xs
+Guards (the | syntax) are super common in Haskell - they're cleaner than if-then-else for multiple conditions.
+Your logic is 100% correct though!
+
+Empty list → False ✅
+Found it → True ✅
+Keep searching → Recurse on the tail ✅
+
+Just remove that if and you're golden! 😄
+Try it out and see if it compiles!why am i a dummy? how do i compile?Feb 3You're not a dummy! Compiling Haskell is different from other languages. Here's how:
+Option 1: Interactive testing (easiest for this assignment)
+
+Open terminal in VS Code (Terminal → New Terminal)
+Type ghci and press Enter
+Load your file: :load HW1.hs (or :l HW1.hs for short)
+Test it: exists 1 [1,2,3]
+
+If there are errors, GHCi will tell you. Fix them, then type :reload (or :r) to reload.
+Option 2: Run the test suite
+
+In ghci, type: :load HW1Tests.hs
+Run tests: run
+
+This will run all the test cases and show you which pass/fail.
+Option 3: Actual compilation (creates an executable - not needed for this assignment)
+In terminal:
+bashghc HW1.hs
+This creates a compiled file, but since you're just writing functions (not a main program), you won't need this.
+For this homework, just use ghci to interactively test! It's the standard way to develop Haskell.
+Try loading your file now:
+bashghci
+:l HW1.hs
+What happens?Well I'll ... I dont have the stuff for the tests. Hunit or stuff. -.-Feb 3Ah right! You need to install HUnit first. With GHCup installed, this is actually super easy now:
+Quick way (using cabal, which came with GHCup):
+In your terminal, just type:
+bashcabal install --lib HUnit
+That's it! It should download and install HUnit for you.
+If that doesn't work, try:
+bashcabal update
+cabal install --lib HUnit
+
+Alternative: Just test without HUnit for now
+You can still test your functions in ghci without running the full test suite:
+bashghci
+:l HW1.hs
+exists 1 [1,2,3]
+exists 1 []
+exists '3' "CptS355"
+This lets you manually check if your functions work while you wait for HUnit to install.
+
+Try the cabal install --lib HUnit command and let me know what happens!should there be a directory I should do this from?Feb 3Good question! It doesn't really matter for installing HUnit (it installs globally), BUT:
+Best practice:
+Navigate to your assignment folder first:
+bashcd path/to/your/assignment/folder
+For example:
+bashcd Documents/CptS355/Assignment1
+(wherever you saved HW1.hs and HW1Tests.hs)
+Then run:
+bashcabal install --lib HUnit
+This way, when you're ready to test, you're already in the right folder to do:
+bashghci
+:l HW1.hs
+
+To find your current directory:
+
+Windows: cd (just type cd and press enter)
+Mac/Linux: pwd
+
+To change directory:
+
+cd foldername - go into a folder
+cd .. - go up one level
+cd ~ - go to your home directory
+
+Where are your HW files saved?ok well I had to do the update oneFeb 3No problem! The cabal update downloads the latest package list, so that's totally normal to need to do first.
+Now try:
+bashcabal install --lib HUnit
+It should start downloading and installing HUnit. This might take a minute or two.
+You'll see messages about downloading packages, building, installing, etc. When it's done, you should see something like "Completed" or it'll just return to your normal command prompt.
+Let me know when it finishes (or if you get any errors)!says the packages required to install already exist. I think the update command just did itFeb 3Perfect! That means HUnit is already installed. You're good to go! 🎉
+Now let's test your code:
+In the terminal (make sure you're in your assignment folder):
+bashghci
+Then:
+bash:load HW1.hs
+or just:
+bash:l HW1.hs
+This will either:
+
+✅ Load successfully and you can test: exists 1 [1,2,3]
+❌ Show you compilation errors that you need to fix
+
+What happens when you try to load it?it's fine but I want to load the testFeb 3Cool! To load the test file:
+bash:load HW1Tests.hs
+or
+bash:l HW1Tests.hs
+This will load both HW1Tests.hs AND HW1.hs (since HW1Tests imports HW1).
+Then to run all the tests:
+bashrun
+(The HW1Tests.hs file has run = runTestTT tests defined at the bottom, which is a shortcut to run all tests)
+What does it say when you load the tests?Ok so it's not compiling and I think it's because I don't have the other functions made yet. so I can't even compile it.Feb 3Ah yes! That's the problem. The test file is trying to call functions that don't exist yet, so it can't compile.
+Quick fix - two options:
+Option 1: Just load HW1.hs and test manually
+bash:l HW1.hs
+exists 1 [1,2,3]
+exists 1 []
+Option 2: Add placeholder functions to HW1.hs
+Add these stubs to your HW1.hs file so it compiles:
+haskell-- 2. listUnion
+listUnion :: Eq a => [a] -> [a] -> [a]
+listUnion = undefined
+
+-- 3. replace
+replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace = undefined
+
+-- 4. prereqFor
+prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor = undefined
+
+-- 5. isPalindrome
+isPalindrome :: [Char] -> Bool
+isPalindrome = undefined
+
+-- 6. groupSumtoN
+groupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN = undefined
+Now HW1Tests.hs will compile (tests will fail for undefined functions, but at least you can test exists).
+Which option do you prefer?Ok let's get back to the homework then. 
+"Write a Haskell function listUnion that takes two lists as input and returns the union of those lists. Your function should have type listUnion :: Eq a => [a] -> [a] -> [a]. Each value should appear in the output list only once, but the order does not matter. Please note that the input lists may have duplicate values or there may be values that appear in both input lists. All such duplicate values should be removed."So the base case would be an empty list, in which case you'd just return the second list. But if that one is empty, you just return an empty list back?Feb 3Good thinking! Let's walk through this:
+Base cases to consider:
+
+First list is empty: listUnion [] list2 = ?
+
+You still need to return list2, BUT remember: list2 might have duplicates in it!
+Example: listUnion [] [1,1,2,3,3] should return [1,2,3] (no duplicates)
+
+
+Both lists are empty: listUnion [] [] = ?
+
+Yeah, just return []
+
+
+
+Recursive case:
+When you have elements in the first list: listUnion (x:xs) list2
+Think about:
+
+Should you add x to the result?
+When should you NOT add x? (hint: when is it a duplicate?)
+What do you do with the rest of the list xs?
+
+Hint: Your exists function might be really useful here! You can check if x already exists in something before adding it.
+Strategy idea:
+
+Take the first element from list1
+Check if it's already in the result somehow
+Recursively process the rest
+
+What's your thought on handling duplicates? How would you check if something is already in your result list?Woof ok this is kind of hard and it's probably not that hard but I kind of enjoy the challenge for myself. I know Haskell only takes things one at time so like, it basically take an index from the first list, removes the head, and then goes to the next index as it pulls the recursion. So technically the first list... in a high level language this is as simple as a nested for loop that appends a number not seen in the the list to it, and skips duplicates.
+I'm trying to wrap my head around how to do this recursivelyFeb 3You're thinking about it the right way! Let me help you think through the recursion without giving you the answer:
+High-level strategy (recursive thinking):
+Build the result one element at a time:
+
+Take the first element x from list1
+Decide: "Should I include x in my final result?"
+
+If x is already somewhere (maybe in list2, or maybe we've already added it), skip it
+Otherwise, add it
+
+
+Recursively handle the rest of list1
+Eventually you run out of list1 elements, then what do you do with list2?
+
+Think about it like this:
+listUnion [1,2,3] [2,4,5]
+
+Step 1: Look at 1
+  - Is 1 in [2,4,5]? No → Keep it
+  - Result so far: [1, ...rest]
+  
+Step 2: Look at 2  
+  - Is 2 in [2,4,5]? Yes → Skip it
+  - Result so far: [1, ...rest]
+  
+Step 3: Look at 3
+  - Is 3 in [2,4,5]? No → Keep it
+  - Result so far: [1, 3, ...rest]
+  
+Step 4: list1 is empty, now what?
+  - Process list2 to remove its duplicates
+Key questions:
+
+How do you "add" an element to a list in Haskell? (hint: : operator)
+How do you check if an element should be skipped? (hint: your exists function!)
+When list1 is empty, do you just slap list2 on? Or do you need to clean it up first?
+
+What do you think about using exists to check if x is already in list2?so are we adding list 1 to list 2? I kind of thought we were adding list 2 onto list 1, sans duplicates. Or does that even matter?Feb 3Great question! It actually doesn't matter which direction you go, but your approach will affect how you think about it.
+Two valid approaches:
+Approach A: Build onto list2
+
+Process list1 element by element
+For each element in list1, check if it's already in list2
+If not, add it to list2
+When list1 is empty, you still need to remove duplicates FROM list2 itself
+
+Approach B: Build a fresh result list
+
+Process list1, adding non-duplicate elements
+Then process list2, adding elements that aren't duplicates
+Build from scratch
+
+The tricky part either way:
+The input lists themselves might have duplicates:
+
+listUnion [1,1,2] [3,3,4] should give [1,2,3,4]
+
+So even if you're "adding list2 to list1", you still need to handle duplicates within each list.
+My hint:
+Think about processing list1 first, then when list1 is empty, you recursively call listUnion on list2 with an empty first list to clean up list2's duplicates. OR use a helper function.
+Does that help clarify? Which approach feels more natural to you?Building a new list from scratch does NOT feel naturally to me BUT I COULD concatenate the lists and THEN go through it and remove doubles? Or is that sillyFeb 3That's not silly at all! It's actually a totally valid approach - very imperative-programmer thinking!
+But here's the catch in Haskell:
+If you concatenate first with ++:
+haskelllistUnion list1 list2 = removeDuplicates (list1 ++ list2)
+Then you need to write a removeDuplicates helper function that goes through and removes duplicates. Which is... basically the same problem! 😅
+Here's the thing:
+In Haskell, you're kind of always building a new list because lists are immutable. You can't modify them in place.
+When you do x : restOfList, you're creating a new list with x at the front.
+Think of it this way:
+haskelllistUnion (x:xs) list2 
+    | exists x list2 = listUnion xs list2  -- skip x, just recurse
+    | otherwise = x : listUnion xs list2   -- add x to the RESULT of the recursion
+You're not "adding to list2" - you're building a NEW list where:
+
+If x is a duplicate, the result is just "whatever the recursion returns"
+If x is NOT a duplicate, the result is "x followed by whatever the recursion returns"
+
+Does thinking about it as "building the result from the recursion" help?OH right I forgot they were immutable so I'd need to make a new one anyway so Id actually be making less lists by just making a new one from scratch after processing the listsFeb 3EXACTLY! 🎉 You just had the "aha" moment!
+If you concatenate first, you'd make:
+
+A concatenated list (new list)
+Then a deduplicated list (another new list)
+= 2 new lists
+
+But if you build as you go:
+
+Just one new list, built element by element as you recurse
+= 1 new list
+
+More efficient AND more "Haskelly"!
+So your recursion builds the result like:
+listUnion [1,2,3] [2,4]
+
+Is 1 in [2,4]? No → 1 : listUnion [2,3] [2,4]
+  Is 2 in [2,4]? Yes → listUnion [3] [2,4]  (skip the 2)
+    Is 3 in [2,4]? No → 3 : listUnion [] [2,4]
+      list1 is empty! → now what with [2,4]?
+So now: what's your base case when list1 is empty? You still have list2 to deal with, and list2 might have duplicates within itself...
+How would you handle that last step?SO I'm not quite there yet but we can do this without a helper function ounds like what you're hinting at. So let's do Approach B. I think that's probably the most efficient?So we pass in 2 lists as an argument, we process list 1, putting elements into a NEW list, checking for duplicates. Then do that for list2?Feb 3Yes! Approach B is clean and efficient. Let me help you think through it:
+The structure:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion (x:xs) list2 = -- process list1
+listUnion [] list2 = -- list1 is empty, now process list2
+Processing list1:
+When you have (x:xs):
+
+Check if x already exists in list2 (use your exists function!)
+If it does exist → skip it, just recurse: listUnion xs list2
+If it doesn't exist → keep it: x : listUnion xs list2
+
+When list1 is empty:
+Now you need to process list2 to remove duplicates within list2 itself.
+Here's the trick: You can recursively call listUnion again!
+
+listUnion [] [2,4,4,5]
+Think: what if you called listUnion [2,4,4,5] []?
+That would process the list and remove duplicates!
+
+OR you could use a helper function in a where clause to remove duplicates from list2.
+Which approach sounds better to you? The recursive call trick, or a helper function?Well functional programming is all recursion i think? The assignment said so?Feb 3Yes! Exactly! The assignment says you must use recursive definitions. So let's stick with recursion.
+Here's the clever trick:
+When list1 is empty, you still have list2 which might have duplicates within itself.
+The trick: You can call listUnion recursively on list2 with an empty list!
+Think about what happens:
+
+listUnion [] [2,4,4,5] ← list1 is empty, list2 has duplicates
+What if you swap them and recurse? listUnion [2,4,4,5] []
+Now you're processing [2,4,4,5] element by element, checking against []
+But wait... exists anything [] is always False, so nothing gets filtered out!
+
+Hmm, that won't work. 🤔
+Better idea - use a helper function WITH recursion:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion list1 list2 = -- your code here
+    where
+        removeDups :: Eq a => [a] -> [a]
+        removeDups [] = -- base case
+        removeDups (x:xs) = -- recursive case
+The helper function uses recursion to remove duplicates. The assignment allows helper functions as long as they're in a where block!
+Does that make sense? Helper functions are okay, they just need to be local and recursive!IsEq a type class or just type?3:06 PMGreat question! Eq is a type class, not a type.
+The difference:
+Type: Int, Bool, String, [Int] - these are actual concrete types
+Type class: Eq, Ord, Num - these are like "interfaces" or "constraints" that say "this type must support certain operations"
+What Eq a => means:
+haskellexists :: Eq t => t -> [t] -> Bool
+This reads as: "For any type t that is a member of the Eq type class, this function takes a t and a list of ts and returns a Bool"
+Translation: t can be any type, AS LONG AS it supports the == operator (which is what Eq provides).
+Why you need it:
+
+You can't do x == y unless the type supports equality
+Eq is the type class that provides == and /=
+So Eq t => says "I need to be able to compare values of type t for equality"
+
+That's why for listUnion you have Eq a => - because you need to check if elements are equal when finding duplicates!
+Does that clear it up?eq is an equivalence class isn't it? So if I'm doing a comparison that is asking if x == y I HAVE to use the Eq class?3:08 PMAlmost! Small clarification:
+Eq is a type class (not quite the same as an equivalence class from math, though related in spirit).
+Here's the key:
+If you use == or /= in your function, then yes, you MUST have Eq in the type signature.
+haskell-- Uses ==, so needs Eq
+exists :: Eq t => t -> [t] -> Bool
+exists value (x:xs) 
+    | value == x = True  -- This is why we need Eq!
+Without Eq, Haskell doesn't know if the type supports equality comparison.
+Why?
+Not all types can be compared for equality. For example, functions can't be compared with ==. So Haskell makes you explicitly declare: "this type must support equality."
+In short:
+
+Using == or /=? → Need Eq constraint
+Using <, >, <=, >=? → Need Ord constraint
+Using +, -, *? → Need Num constraint
+
+So yes, for listUnion, since you'll be checking if elements are equal (to find duplicates), you need Eq a => in your type signature!
+Make sense?What if I'm using == AND >?3:11 PMThen you need both Eq AND Ord!
+But here's the thing: Ord already includes Eq (you can't have an ordering without equality), so you only need to write:
+haskellmyFunction :: Ord a => a -> a -> Bool
+This automatically gives you both == AND <, >, <=, >=.
+Example:
+haskell-- Only need Ord, it includes Eq
+isBetween :: Ord a => a -> a -> a -> Bool
+isBetween x low high = x >= low && x <= high && x == low  -- can use both!
+The hierarchy:
+
+Eq - provides == and /=
+Ord - provides <, >, <=, >= (and includes Eq)
+Num - provides +, -, * (and includes Eq)
+
+So if you see Ord a =>, you automatically get equality checking too!
+For listUnion, you only need Eq since you're just checking equality, not ordering.
+Make sense?OH right! So I'd just need Ord since Eq is IN Ord. So many rules XD3:11 PMHaha YES! So many rules! But you're getting it! 🎉
+But wait - for listUnion, you actually only need Eq, not Ord!
+You're only checking if things are equal (for duplicates), you're not comparing if one is bigger/smaller than another.
+Rule of thumb:
+Use the LEAST restrictive constraint you need:
+
+Only using ==? → Just use Eq
+Using < or >? → Use Ord (which includes Eq)
+
+For listUnion:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]  -- Correct! Just need equality
+If you used Ord it would still work, but it's unnecessarily restrictive - you'd be saying "this only works with types that can be ordered" when really you just need "types that can be compared for equality."
+Where you WILL need Ord:
+Problem 6 (groupSumtoN) uses <= to compare sums, so that one needs Ord!
+Does that make sense? Use the weakest constraint that lets your function work!I know I'm just asking to learn. : )So basically to answer:
+"Explain in a comment why the type is
+exists :: Eq t => t -> [t] -> Bool
+but not
+exists :: t -> [t] -> BoolI need the type class Eq because I'm using it to check for equivalency, particularly in value == x = TrueShow more3:12 PMPerfect! That's exactly right!
+You could write your comment like:
+haskell{- The type signature requires 'Eq t =>' because the function uses the 
+   equality operator (==) to compare 'value' with elements in the list.
+   Without the Eq constraint, Haskell wouldn't know if type 't' supports
+   equality comparison. -}
+Or more concisely:
+haskell-- We need 'Eq t =>' because we use == to compare values,
+-- and not all types support equality checking.
+You nailed the concept! The Eq constraint tells Haskell: "whatever type t is, it must support the == operator."
+Alright, ready to tackle listUnion now with your newfound type class knowledge? 😄

@@ -1,0 +1,547 @@
+Here's my slides, and let me attach the homework assignment. I'm working on #4 the prereq one4:07 PMI'll help you with question #4 about prerequisites. Let me first view your slides and the homework assignment to understand what you're working on.View the uploaded slides to understand the contextView the uploaded slides to understand the contextDoneI can see you have lecture slides uploaded. Could you also attach the homework assignment document? That will help me see exactly what question #4 is asking for the prerequisites problem.pdf4:07 PMPerfect! Now I can see question #4 about prereqFor. Let me break down what you need to do:
+Problem #4: prereqFor
+You need to write a function that finds which courses require a given course as a prerequisite.
+Type signature: prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+How it works:
+
+Takes a list of tuples (course name, list of prerequisites)
+Takes a target course name
+Returns a list of course names that have the target course in their prerequisite list
+
+Example:
+
+prereqFor prereqsList "CptS223" returns all courses that require CptS223 as a prerequisite
+Looking at the data, "CptS260" has prerequisites ["CptS223", "CptS233"], so "CptS260" should be in the result
+
+Strategy:
+
+Go through each tuple in the prerequisites list
+Check if the target course exists in that tuple's prerequisite list (use your exists function!)
+If it does, include that course name in the result
+If it doesn't, skip it
+
+Hint from the assignment: You can use the exists function you already wrote!
+Here's a skeleton to get you started:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor courseList targetCourse = 
+    -- filter the courseList to only include courses where
+    -- targetCourse exists in their prerequisite list
+    -- then extract just the course names
+Think about:
+
+How to check each tuple's prerequisite list for the target course
+How to extract just the course name from matching tuples
+You might want to use list comprehension or filter + map
+
+Would you like me to help you think through the implementation step by step, or would you prefer to give it a try first?So it's Eq which means we are probably using == somewhere, or a function that uses Eq, yes?4:08 PMExactly! You've got the right idea.
+The Eq t => constraint means that the type t (which is the type of the target course and the elements in the prerequisite lists) must support equality comparison.
+So yes, somewhere in your function you'll need to:
+
+Compare the target course to courses in the prerequisite lists using ==, OR
+Use a function that internally uses == (like your exists function!)
+
+Looking at your exists function from problem #1:
+haskellexists :: Eq t => t -> [t] -> Bool
+It also has the Eq t => constraint because it needs to check if a value equals any element in a list.
+So in prereqFor, you'll be doing something like:
+
+For each course tuple (courseName, prereqList)
+Check if exists targetCourse prereqList is True
+If so, include courseName in your result
+
+The Eq constraint is needed because you're checking "does this target course appear in this list of prerequisites?" which requires equality comparison.
+Does that make sense? The type signatures are giving you a hint about what operations you'll need!omg I'm stupid what does the stuff before the => mean and the stuff after it4:09 PMYou're not stupid at all! This is actually a really important concept in Haskell that takes time to understand. Let me break it down:
+Type Constraints
+The general pattern is: constraint => actual_type
+Before the =>: Type constraints (restrictions on what types can be used)
+After the =>: The actual type signature
+Example from your exists function:
+haskellexists :: Eq t => t -> [t] -> Bool
+Breaking it down:
+
+Eq t => — This is saying "type t must be a member of the Eq typeclass"
+
+In other words: t must be a type that supports equality comparison (==)
+
+
+t -> [t] -> Bool — This is the actual function type
+
+Takes a value of type t
+Takes a list of type t
+Returns a Bool
+
+
+
+Why do we need the constraint?
+Without Eq t =>, you couldn't use == on values of type t because Haskell wouldn't know if that type supports equality.
+Another way to read it:
+"For any type t that supports equality comparison, this function takes a t, a list of t, and returns a Bool"
+For prereqFor:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+
+Eq t => — the prerequisite course names (type t) must support equality
+[(a, [t])] -> t -> [a] — takes a list of tuples, takes a t, returns a list of a
+
+Make sense now?is that ONLY for t? So like if we had a function that was 
+whatever :: Eq t => t -> v -> Boolor something like that, does that mean type t has to be Eq. If v was also Eq type then does it have to be 
+Eq t, v => t -> v -> Bool4:10 PMPerfect question! Yes, you've got it exactly right!
+Constraints apply only to the types listed
+Example 1:
+haskellwhatever :: Eq t => t -> v -> Bool
+
+Only t needs to support equality (Eq)
+v can be ANY type (no constraints on it)
+You could use == on values of type t, but NOT on values of type v
+
+Example 2:
+haskellwhatever :: (Eq t, Eq v) => t -> v -> Bool
+
+Both t AND v need to support equality
+You could use == on values of type t AND on values of type v
+Note: Multiple constraints use parentheses and commas!
+
+Example 3:
+haskellwhatever :: t -> v -> Bool
+
+Neither t nor v has any constraints
+You can't use == on either of them
+They could be ANY types
+
+In your prereqFor:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+
+t must support equality (because you need to check if a course exists in prerequisite lists)
+a has NO constraints (it's just the course name type, could be String, Int, whatever)
+
+So yes, if you need multiple types to have constraints, you list them all with commas in parentheses like (Eq t, Eq v, Ord a) => etc.
+Does that clear it up?"Assume that you are creating an application for WSU. You would like to write a Haskell function prereqFor that takes the list of courses (similar to above) and a particular course number and returns the list of the courses which require this course as a prerequisite."Is this not worded so overly complicated-ly?4:25 PMYES! You're absolutely right, it's way overworded. Here's what it's actually saying:
+Simple version:
+"Write a function that finds all courses that have a given course as a prerequisite."
+That's it!
+Example to make it concrete:
+If I ask: "What courses need CptS223 as a prerequisite?"
+Your function should look through the list and find:
+
+CptS260 (because it has CptS223 in its prereq list)
+CptS315 (because it has CptS223 in its prereq list)
+CptS321 (because it has CptS223 in its prereq list)
+etc.
+
+The opposite direction:
+The data structure GIVES you: "CptS260 requires [CptS223, CptS233]"
+Your function FINDS: "CptS223 is required by [CptS260, CptS315, CptS321, ...]"
+Academic writing tends to be unnecessarily verbose! The function is basically asking: "Who needs this course?" instead of "What does this course need?"
+Does that make it clearer?So if I pass in Cpts 223, it will give me a list of classes that REQUIRE that one as a prereq?4:26 PMYES! Exactly!
+If you pass in "CptS223", it gives you all the classes that require CptS223 as a prerequisite.
+So looking at the data:
+
+CptS260 has prereqs ["CptS223", "CptS233"] — CptS223 is in there ✓
+CptS315 has prereqs ["CptS223", "CptS233"] — CptS223 is in there ✓
+CptS355 has prereqs ["CptS223"] — CptS223 is in there ✓
+CptS360 has prereqs ["CptS223", "CptS260"] — CptS223 is in there ✓
+
+So the result would be: ["CptS260", "CptS315", "CptS321", "CptS322", "CptS350", "CptS355", "CptS360", "CptS427"]
+You're essentially answering: "If I take CptS223, what courses does that unlock for me?"
+You've got it! 🎯ok jesus so it's passing it tuples, which are basically a bunch of like... patterns I guess where a is like, the first object and then the second part is the list associated with that object.4:32 PMYES! Exactly!
+A tuple is just a way to pair things together. In this case:
+haskell("CptS223", ["CptS122", "MATH216"])
+
+First element (a): The course name - "CptS223"
+Second element ([t]): The list of prerequisites - ["CptS122", "MATH216"]
+
+So the full input [(a, [t])] is:
+
+A list of tuples
+Each tuple contains a course name and its prereq list
+
+Breaking down the type:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+
+[(a, [t])] — list of tuples where each tuple is (courseName, [prereqList])
+t — the course you're searching for (like "CptS223")
+[a] — returns a list of course names
+
+So you're basically:
+
+Going through each tuple (courseName, prereqList)
+Checking "is my target course in this prereqList?"
+If yes, add courseName to my result
+
+The tuple is just the data structure that connects a course to its prerequisites!
+Does that click now?so where I'm confused is why the list is of type t and the course we are searching for is of the same type4:33 PMGreat question! Let me clarify what's actually happening here.
+The confusion:
+You're thinking: "Why is the course we're searching for (type t) the same type as the elements in the prerequisite list ([t])?"
+The answer:
+Because they're all course names! They should be the same type.
+Look at the data:
+haskell("CptS260", ["CptS223", "CptS233"])
+
+"CptS260" is a course name (type a)
+"CptS223" is a course name (type t)
+"CptS233" is a course name (type t)
+
+When you search:
+haskellprereqFor prereqsList "CptS223"
+
+You're passing in "CptS223" (type t)
+You're checking if it exists in lists like ["CptS223", "CptS233"] (type [t])
+
+Both are course names, so they're the same type!
+Why are a and t different types in the signature?
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+Even though in practice they're both Strings representing course names, Haskell's type system keeps them separate because:
+
+a is the "key" (course being defined)
+t is in the "values" (prerequisites)
+
+But conceptually, yes, they're all just course names. The type system just distinguishes between "courses in the first position" vs "courses in the prerequisite lists."
+Does that make sense?ok but then shouldnt a be the same type?4:34 PMYou're absolutely right to question this!
+In practice, yes, a and t are probably both String (course names).
+But here's why they're kept separate in the type signature:
+The type system doesn't require them to be the same. The signature says:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+This is saying:
+
+a could be ANY type (course names - could be String, Int, a custom type, whatever)
+t must support equality (prerequisite names - needs to be comparable)
+You're searching for a t in lists of t
+You're returning a list of a
+
+Why not make them the same?
+The function is more general this way! For example, you could have:
+haskell[(Int, [String])]  -- course IDs (Int) with prereq names (String)
+Where a = Int and t = String.
+But in your actual data, yes, both are Strings:
+haskell[("CptS260", ["CptS223", "CptS233"])]  -- both String
+The key point:
+The type signature allows flexibility. In your specific case, a and t will both be String, but Haskell doesn't force that constraint. The function works as long as:
+
+You can compare t values (hence Eq t)
+The structure matches [(a, [t])]
+
+Does that make more sense?OH! So what's happening is a is any type, but t has to be the same ebcause we're comparing the value the user inputs with ALL the lists associated with each object to check if that class is in there and then it returns a list of all the objects associated with those.4:35 PMYES! EXACTLY! You got it! 🎉
+Let me confirm what you just said because it's perfect:
+
+a is any type — it's just the course name (the "key"), we don't need to do anything with it except return it
+t has to be Eq because we're comparing:
+
+The course the user searches for (type t)
+With every element in every prerequisite list (also type t)
+We need == to check "is this course in this prereq list?"
+
+
+Return [a] — give back a list of all the course names (the "keys") where we found a match
+
+In action:
+haskellprereqFor [("CptS260", ["CptS223", "CptS233"]), ...] "CptS223"
+
+Check: is "CptS223" in ["CptS223", "CptS233"]? YES! → include "CptS260"
+Check: is "CptS223" in ["CptS122", "MATH216"]? NO → skip
+etc.
+
+The t needs Eq for the comparison, but a doesn't need any constraints because we're just collecting and returning those values.
+You nailed it! That's exactly how it works. 🙌OK! So that's just what the functions does. XD and the types. So wtf this is crazy insane. The base case is there's no more in the list to search or there's just none to begin with4:39 PMYES! Exactly!
+Base case:
+haskellprereqFor [] targetCourse = []
+When the list is empty (either from the start or you've gone through everything), return an empty list.
+Recursive case:
+You need to check the first tuple, then recurse on the rest:
+haskellprereqFor ((courseName, prereqList) : rest) targetCourse =
+    -- if targetCourse exists in prereqList
+    --     then include courseName in result
+    -- recurse on rest either way
+Pseudocode logic:
+
+Take the first tuple (courseName, prereqList)
+Use exists targetCourse prereqList to check if it's in there
+If TRUE → add courseName to your result
+If FALSE → don't add it
+Recurse on the rest of the list
+Combine results
+
+Pattern you might use:
+haskellprereqFor [] _ = []
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor rest targetCourse
+        else prereqFor rest targetCourse
+Or you could use a list comprehension, guards, or other approaches!
+Does the structure make sense now?so we're gonna need a helper function?4:42 PMNot necessarily!
+Looking at the structure, you can write this directly as a recursive function without a helper. The pattern is pretty straightforward:
+haskellprereqFor [] _ = []  -- base case
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    -- check if targetCourse is in prereqList
+    -- if yes, include courseName
+    -- recurse on rest
+When would you need a helper function?
+You'd need a helper if you were:
+
+Accumulating results in a different way
+Tracking additional state
+Making it tail-recursive with an accumulator
+
+But for this problem, the straightforward recursive approach works fine!
+Alternative: List comprehension (no helper needed either!)
+haskellprereqFor courseList targetCourse = 
+    [courseName | (courseName, prereqList) <- courseList, 
+                  exists targetCourse prereqList]
+This reads as: "Give me all courseNames where targetCourse exists in the prereqList"
+Both approaches work! The assignment says you need helper functions inside let..in or where blocks when they're needed, but this problem doesn't really need one.
+Which approach sounds clearer to you?Oh it says to make use of exists:- 1. exists
+{-
+Type class Eq. Takes a “value” and a “list” as input. Returns boolean. 
+If the value is a member of the list, the function returns True. 
+Otherwise returns False.
+-}
+exists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs)
+     | value == x = True
+     | otherwise = exists value xs
+{-Show more4:43 PMPerfect! You already have exists implemented. Now you just need to use it in prereqFor.
+Since exists takes a value and a list and returns True if the value is in the list, you can use it to check if the target course is in each prerequisite list.
+Here's how to use it:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor rest targetCourse
+        else prereqFor rest targetCourse
+Or with the list comprehension approach:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor courseList targetCourse = 
+    [courseName | (courseName, prereqList) <- courseList, 
+                  exists targetCourse prereqList]
+Both use your exists function to check if targetCourse is in the prereqList!
+Which style do you prefer? The explicit recursion or the list comprehension?I want to make sure I'm using the lecture slides as like.. reference I don't want to do crazy stuff not in the lectures4:43 PMThat's a smart approach! Let me look at your lecture slides to see what patterns and techniques have been covered.Check the Haskell intro lecture to see what patterns and techniques are coveredCheck the Haskell intro lecture to see what patterns and techniques are coveredDoneThe PDF is showing the raw content. Let me check what patterns are covered in the slides by viewing it as an image-based PDF:Extract text from the Haskell intro PDF to see what patterns are coveredExtract text from the Haskell intro PDF to see what patterns are coveredScriptDoneLet me get more of the text to see specific Haskell patterns:Search for specific Haskell patterns covered in the lectureSearch for specific Haskell patterns covered in the lectureScriptDoneLet me try a different approach and look for examples in the PDF:Get more content from the Haskell intro lectureGet more content from the Haskell intro lectureScriptDoneBased on what I can see from the slides, they cover basic patterns like:
+
+Pattern matching with :: (cons)
+Guards with |
+Basic recursion
+let..in blocks
+
+Let me show you both approaches (explicit recursion and list comprehension) since both are valid Haskell patterns:
+Approach 1: Explicit Recursion (most similar to your exists function)
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor rest targetCourse
+        else prereqFor rest targetCourse
+This follows the same pattern as your exists function - base case with empty list, then recursive case that checks and builds the result.
+Approach 2: List Comprehension (also covered in lectures)
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor courseList targetCourse = 
+    [courseName | (courseName, prereqList) <- courseList, 
+                  exists targetCourse prereqList]
+Both are perfectly valid! The first one is more explicit and closer to the style of your exists function. The second is more concise and is also a standard Haskell pattern.
+Which one feels more comfortable to you based on what you've practiced?The backwards arrow is something we learned?4:44 PMYes! The backwards arrow <- is used in list comprehensions, which should be covered in your lectures.
+It's read as "drawn from" or "taken from".
+List comprehension syntax:
+haskell[expression | pattern <- list, condition]
+This reads as: "Build a list of expression for each pattern drawn from list where condition is true"
+Example from basics:
+haskell-- Get all even numbers from a list
+evens = [x | x <- [1,2,3,4,5,6], even x]
+-- Result: [2,4,6]
+
+-- Double all numbers in a list
+doubled = [x*2 | x <- [1,2,3]]
+-- Result: [2,4,6]
+For your prereqFor:
+haskell[courseName | (courseName, prereqList) <- courseList, exists targetCourse prereqList]
+Reads as: "Give me all courseNames where each (courseName, prereqList) is drawn from courseList and where targetCourse exists in prereqList"
+If you haven't covered list comprehensions yet in lecture, then stick with the explicit recursion approach (Approach 1)! That's definitely something you've seen with your exists function.
+Want to go with the recursive approach?let's...  ugggh. Wtf is this just the base case? Like wtf is happening?:
+"prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor courseList targetCourse = 
+    [courseName | (courseName, prereqList) <- courseList, 
+                  exists targetCourse prereqList]"4:51 PMI totally get the confusion! Let me break this down:
+What's happening here:
+This is NOT recursion - this is a single expression using a list comprehension. There's no base case needed because the list comprehension handles everything in one go.
+Let me rewrite it to show what's equivalent:
+haskell-- List comprehension version (one-liner, no recursion)
+prereqFor courseList targetCourse = 
+    [courseName | (courseName, prereqList) <- courseList, 
+                  exists targetCourse prereqList]
+This is doing ALL of this automatically:
+
+Go through each tuple in courseList
+For each tuple, split it into courseName and prereqList
+Check if exists targetCourse prereqList is True
+If True, add courseName to the result list
+If False, skip it
+Return the final list
+
+It's equivalent to this recursive version:
+haskell-- Recursive version (explicit, with base case and recursive case)
+prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []  -- BASE CASE: empty list returns empty
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor rest targetCourse  -- RECURSIVE CASE: include it
+        else prereqFor rest targetCourse                -- RECURSIVE CASE: skip it
+The list comprehension is just syntactic sugar - it does the recursion for you behind the scenes!
+Does that clear it up? The list comprehension is fancy shorthand, but the recursive version is more explicit about what's actually happening.Wait it needs to be recursion doesn't it, via the assignment?4:51 PMLet me check the assignment requirements again...
+Looking at the assignment:
+
+"Unless directed otherwise, you must implement your functions using recursive definitions built up from the basic built-in functions."
+
+And:
+
+"When auxiliary functions are needed, make them local functions (inside a let..in or where block)."
+
+So YES, you're right! The assignment wants you to use explicit recursion. List comprehensions, while they do recursion internally, aren't explicitly recursive in your code.
+So you should use the recursive approach:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []  -- Base case
+prereqFor ((courseName, prereqList) : rest) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor rest targetCourse
+        else prereqFor rest targetCourse
+This explicitly shows:
+
+Base case: Empty list returns empty list
+Recursive case: Check the first tuple, then recurse on the rest
+
+Good catch! The assignment wants to see you understand recursion, not just use built-in list comprehension shortcuts.
+Does this version make sense now?Ok so an empty list just means there are no pre-reqs for that class. Will there ever be a case where there's an empty object being passed? I don't think so?4:56 PMGood question! Let's think about what could be empty:
+1. Empty courseList []
+haskellprereqFor [] "CptS223"
+This means you're searching through an empty course list - there are no courses at all. Result: [] (no courses found)
+2. Empty prerequisite list for a specific course
+haskell("CptS355", [])  -- CptS355 has NO prerequisites
+This is fine! It just means CptS355 doesn't require any other courses. When you search for something in an empty prereq list, exists will return False, so this course won't be included in the result.
+3. Will there be empty tuples or weird data?
+Looking at the type signature:
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+The type system guarantees:
+
+Each tuple MUST have 2 elements: (a, [t])
+The second element MUST be a list (but it can be empty)
+
+So no, you won't get malformed data - the type system prevents that!
+Your base case prereqFor [] _ = [] handles:
+
+An empty course list being passed in initially
+OR when you've recursed through all courses
+
+Either way, it returns an empty result list, which is correct!
+Make sense?Omg it does duh. Empty list and don't care. XD I am TIRED.4:57 PMHaha YES! You got it!
+haskellprereqFor [] _ = []
+
+[] = empty list (no courses left)
+_ = don't care what the target course is (wildcard/throwaway)
+= [] = return empty list
+
+You're doing great! Being tired and still understanding this stuff is impressive.
+Want to write out the full function now, or do you want to take a break? No judgment either way - functional programming when you're tired is ROUGH. 😅can I call "rest" a different name. I'm assuming it's shorthand for like "the rest" and I think tail makes more sense to me4:59 PMAbsolutely! You can call it whatever you want!
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : tail) targetCourse =
+    if exists targetCourse prereqList
+        then courseName : prereqFor tail targetCourse
+        else prereqFor tail targetCourse
+rest, tail, xs, remaining - all totally valid! Use whatever makes sense to you.
+Note: Just be aware that tail is also a built-in Haskell function (that gets the tail of a list), but using it as a variable name here is fine - it won't conflict because of how scoping works. But if that feels weird, you could also use:
+
+restOfList
+remaining
+others
+xs (common Haskell convention for "list of x's")
+
+Whatever clicks for you! 🙌Can I not replace the if/else with line guards?5:03 PMYES! Absolutely! Guards are perfect here and actually more idiomatic Haskell!
+haskellprereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : tail) targetCourse
+    | exists targetCourse prereqList = courseName : prereqFor tail targetCourse
+    | otherwise = prereqFor tail targetCourse
+This is cleaner and more in the style of your exists function!
+Guards (|) are read as conditions:
+
+| exists targetCourse prereqList = "if this is true, do this"
+| otherwise = "otherwise, do this" (like else)
+
+This is way more Haskell-y than if/else. Nice thinking! 🎯ok give me something to copy/paste to test this5:06 PMHere's something you can copy/paste into GHCI to test:
+haskell-- First load your exists function
+exists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs)
+     | value == x = True
+     | otherwise = exists value xs
+
+-- Then define prereqFor
+prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : tail) targetCourse
+    | exists targetCourse prereqList = courseName : prereqFor tail targetCourse
+    | otherwise = prereqFor tail targetCourse
+
+-- Test data
+prereqsList = 
+ [ ("CptS122" , ["CptS121"]), 
+   ("CptS132" , ["CptS131"]), 
+   ("CptS223" , ["CptS122", "MATH216"]), 
+   ("CptS233" , ["CptS132", "MATH216"]), 
+   ("CptS260" , ["CptS223", "CptS233"]), 
+   ("CptS315" , ["CptS223", "CptS233"]), 
+   ("CptS317" , ["CptS122", "CptS132", "MATH216"]), 
+   ("CptS321" , ["CptS223", "CptS233"]), 
+   ("CptS322" , ["CptS223","CptS233"]), 
+   ("CptS350" , ["CptS223","CptS233", "CptS317"]), 
+   ("CptS355" , ["CptS223"]), 
+   ("CptS360" , ["CptS223","CptS260"]),
+   ("CptS370" , ["CptS233","CptS260"]),
+   ("CptS427" , ["CptS223","CptS360", "CptS370", "MATH216", "EE234"])
+ ]
+
+-- Test it!
+prereqFor prereqsList "CptS260"
+prereqFor prereqsList "CptS223"
+prereqFor prereqsList "CptS355"
+prereqFor prereqsList "MATH216"
+Just paste this whole thing into GHCI and it should work!Well I have the functions already in there to compile?5:07 PMOh right! Then just paste this to test:
+haskell-- Test data
+prereqsList = 
+ [ ("CptS122" , ["CptS121"]), 
+   ("CptS132" , ["CptS131"]), 
+   ("CptS223" , ["CptS122", "MATH216"]), 
+   ("CptS233" , ["CptS132", "MATH216"]), 
+   ("CptS260" , ["CptS223", "CptS233"]), 
+   ("CptS315" , ["CptS223", "CptS233"]), 
+   ("CptS317" , ["CptS122", "CptS132", "MATH216"]), 
+   ("CptS321" , ["CptS223", "CptS233"]), 
+   ("CptS322" , ["CptS223","CptS233"]), 
+   ("CptS350" , ["CptS223","CptS233", "CptS317"]), 
+   ("CptS355" , ["CptS223"]), 
+   ("CptS360" , ["CptS223","CptS260"]),
+   ("CptS370" , ["CptS233","CptS260"]),
+   ("CptS427" , ["CptS223","CptS360", "CptS370", "MATH216", "EE234"])
+ ]
+
+-- Test it!
+prereqFor prereqsList "CptS260"
+prereqFor prereqsList "CptS223"
+prereqFor prereqsList "CptS355"
+prereqFor prereqsList "MATH216"
+If your file is already loaded in GHCI, just paste the test data and the test calls!I'm getting a bunch of parse errors for the list5:08 PMAh, GHCI can be finicky with multi-line input! Try this - put it all on fewer lines:
+haskellprereqsList = [("CptS122", ["CptS121"]), ("CptS132", ["CptS131"]), ("CptS223", ["CptS122", "MATH216"]), ("CptS233", ["CptS132", "MATH216"]), ("CptS260", ["CptS223", "CptS233"]), ("CptS315", ["CptS223", "CptS233"]), ("CptS317", ["CptS122", "CptS132", "MATH216"]), ("CptS321", ["CptS223", "CptS233"]), ("CptS322", ["CptS223","CptS233"]), ("CptS350", ["CptS223","CptS233", "CptS317"]), ("CptS355", ["CptS223"]), ("CptS360", ["CptS223","CptS260"]), ("CptS370", ["CptS233","CptS260"]), ("CptS427", ["CptS223","CptS360", "CptS370", "MATH216", "EE234"])]
+Then test:
+haskellprereqFor prereqsList "CptS260"
+prereqFor prereqsList "CptS223"
+Or better yet - add prereqsList to your .hs file and reload it in GHCI with :r!["CptS360","CptS370"]
+ghci> prereqFor prereqsList "CptS223"
+["CptS260","CptS315","CptS321","CptS322","CptS350","CptS355","CptS360","CptS427"]
+ghci>5:10 PMPERFECT! 🎉
+Your function is working correctly! Those results match exactly what the assignment expects:
+✅ prereqFor prereqsList "CptS260" → ["CptS360","CptS370"]
+✅ prereqFor prereqsList "CptS223" → ["CptS260","CptS315","CptS321","CptS322","CptS350","CptS355","CptS360","CptS427"]
+Try the other test cases too:
+haskellprereqFor prereqsList "CptS355"
+prereqFor prereqsList "MATH216"
+Expected results:
+
+"CptS355" should return [] (no courses require it)
+"MATH216" should return ["CptS223","CptS233","CptS317","CptS427"]
+
+You nailed it! 🙌

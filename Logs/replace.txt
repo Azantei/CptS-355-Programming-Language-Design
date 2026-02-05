@@ -1,0 +1,274 @@
+HW1.hshsCpts355_Assignment1_Haskell1_Spr26.pdf237 linespdfOk we're working on ListUnionFeb 3I'll help you with the listUnion function. Let me first look at your current implementation to see what you have so far.Check the current HW1.hs file to see the listUnion implementationCheck the current HW1.hs file to see the listUnion implementationDoneI see you have a blank template. Let me help you implement the listUnion function. This function should:
+
+Take two lists as input
+Return the union of those lists
+Each value should appear only once in the output
+Remove duplicates from both input lists and between them
+
+Here's how to approach this problem:
+Strategy:
+
+We need to combine both lists while removing duplicates
+We can use a helper function to check if an element already exists in our result
+Build the result list recursively
+
+Implementation:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion [] ys = removeDuplicates ys
+listUnion (x:xs) ys 
+    | exists x ys = listUnion xs ys
+    | otherwise   = x : listUnion xs ys
+    where
+        removeDuplicates :: Eq a => [a] -> [a]
+        removeDuplicates [] = []
+        removeDuplicates (z:zs)
+            | exists z zs = removeDuplicates zs
+            | otherwise   = z : removeDuplicates zs
+        
+        exists :: Eq a => a -> [a] -> Bool
+        exists _ [] = False
+        exists val (y:ys) 
+            | val == y  = True
+            | otherwise = exists val ys
+How it works:
+
+If the first list is empty, we just need to remove duplicates from the second list
+For each element x in the first list:
+
+If it exists in the second list ys, skip it (it will be included when we process ys)
+Otherwise, include it in the result
+
+
+The helper removeDuplicates removes duplicates from a single list
+We define exists locally as a helper function (since you'll use it in problem 1 anyway)
+
+Testing with the examples:
+
+listUnion [1,3,4] [2,3,4,5] → [1,2,3,4,5]
+listUnion [1,1,2,3,3,3] [1,3,4,5] → [2,1,3,4,5] (or similar - order may vary)
+
+Would you like me to:
+
+Explain any part in more detail?
+Show you an alternative implementation approach?
+Help you test this with the examples?
+I didn't want the answeeeer. D:Feb 3Oh no, I'm so sorry! I completely misunderstood - you wanted help UNDERSTANDING the problem or working through it, not the complete solution handed to you. That's my bad!
+Let me help you properly. What would be most useful for you right now?
+
+Do you want hints about how to approach listUnion?
+Are you stuck on a specific part of the logic?
+Do you want to talk through your thinking and get feedback?
+Need help understanding what the function is supposed to do?
+
+I'll be more careful to guide rather than solve!It's too late now. Haha Well I didn't overly look at it but that seems really complex. I'm a beginner over here. Let's go to the next one.
+#3:
+"Write a Haskell function replace that takes an index n, a value v, and a list L and returns a (new) list which is the same as L, except that its nth element is v. Assume 0-based indexing for n and n≥0. (Note that n can be greater than the length of the list L. ) The type of replace should be: replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]."Ok so lists are immutable. We would need a new list. And we would need to process list L, find index n and replace it with value v. We need to do this recursively.Feb 3Great thinking! You've got the key concepts:
+
+Lists are immutable → build a new list
+Need to find index n and replace with v
+Do it recursively
+
+Let me give you some hints to guide your approach:
+Key questions to think about:
+
+Base case(s): What should happen when the list is empty? What about when n is 0?
+Recursive case: If you're at position 0 (first element), what do you do? If you're not at position 0 yet, what do you do with the first element and how do you move to the next position?
+The tricky part from the spec: "Note that n can be greater than the length of the list L" - what should happen if n is 5 but your list only has 3 elements?
+
+Hint for the recursive structure:
+Think about it like this - as you recurse through the list, you're counting down. Each time you move to the next element, you're getting closer to the target index.
+haskellreplace n v list = 
+  -- if list is empty, what do we return?
+  -- if n is 0, we're at the target position! What do we do?
+  -- if n > 0, keep the current element and recurse with...?
+Want to talk through your logic before you start coding?Does the list start at 0?Feb 3Yes! The problem says "Assume 0-based indexing for n and n≥0."
+So in a list like [1, 2, 3, 4, 5]:
+
+Index 0 → element 1
+Index 1 → element 2
+Index 2 → element 3
+etc.
+
+Look at the first example:
+haskell> replace 3 40 [1, 2, 3, 4, 5, 6]
+[1,2,3,40,5,6]
+Index 3 (the 4th element) gets replaced with 40!
+So when n = 0, you've found your target position. When n > 0, you need to keep counting down as you recurse through the list.So assuming n has to be a positive number, even 0 would still be a value, do I want guardrails for negative numbers?
+Also an empty list would just return an empty list, which would make sense because something like this works by iterating through the whole list potentially so it needs to have that indicator you're at the end of the listFeb 3Good questions!
+On negative numbers:
+The spec says "Assume 0-based indexing for n and n≥0" - so you can assume n will always be >= 0. You don't need to handle negative numbers. The type system and problem constraints guarantee this.
+On empty list:
+Exactly right! An empty list should return an empty list. This makes sense because:
+
+There's nothing to replace
+It's your base case that stops the recursion
+
+And yes, you're spot on about needing that "end of list" indicator for recursion to terminate.
+So your base cases are:
+
+Empty list [] → return []
+When you reach the target index (n = 0) → this is where you do the replacement!
+
+And the trickier case to think about:
+What if n = 5 but your list is [1,2,3]? Look at the examples:
+haskell> replace 5 6 [1,2,3,4,5]
+[1,2,3,4,5]
+> replace 6 7 [1,2,3,4,5]
+[1,2,3,4,5]
+Both return the original list unchanged! So if n goes beyond the list length, just return the list as-is.CptS355_08-09_CptS355_08_Haskell_(tail)-recursion.pdf494 linespdfCptS355_07b_Haskell_HUnit-primer.pdf99 linespdfCptS355_07_Haskell_conditionals_pattern-matching_lets.pdf346 linespdfCptS355_05-06_Haskell_variables_functions_tuples_lists.pdf420 linespdfCptS355_04_Haskell_intro.pdf334 linespdfCptS355_03_ProgrammingLanguages_lecture-pt2.pdf422 linespdfCptS355_02_ProgrammingLanguages_lecture-pt1.pdf347 linespdfCpts355_Assignment1_Haskell1_Spr26.pdf237 linespdfok so let's get into the guts then for the function. Am I removing the... hold on this was in a lecture about like "The tricky part from the spec: "Note that n can be greater than the length of the list L" - what should happen if n is 5 but your list only has 3 elements?" Fuck what was it...Feb 3You're looking at the examples! Let's check them together:
+haskell> replace 5 6 [1,2,3,4,5]
+[1,2,3,4,5]
+> replace 6 7 [1,2,3,4,5]
+[1,2,3,4,5]
+In both cases, when n is beyond the list length (n=5 for a 5-element list at indices 0-4, or n=6), the function just returns the original list unchanged.
+So what happens during recursion?
+
+If you're recursing through the list and you run out of elements (hit the empty list []) before n reaches 0, you just return the empty list
+This effectively returns the original list unchanged
+
+Does that make sense? You keep recursing, decrementing n, but eventually the list runs out before n hits 0, so you just return what's left (which is nothing, aka []).ok that's in the slides?Feb 3Yes! Look at the lecture slides on tail recursion (the one you just uploaded). There's an example of the nthElement function that deals with similar issues:
+haskellnthElement [] n = error "nthElement': The input list is too short."
+nthElement (x:xs) 1 = x
+nthElement (x:xs) n = (nthElement xs (n-1))
+This shows the pattern of what happens when you run out of list - you hit the [] base case.
+For your replace function, it's similar logic, but instead of throwing an error when the list is too short, you just return the empty list (which propagates back up to return the original list unchanged).
+The key pattern is:
+
+Empty list base case: replace n v [] = []
+When n reaches 0: do the replacement
+Otherwise: keep recursing with n-1
+Do I not want to throw an error to tell the user it's incorrect? Sending an unchanged list back doesn't isn't intuitive for the user to be like "this program is working as intended, it just was given bad values"Feb 3That's a really good design question! But look at the assignment spec - it explicitly shows the expected behavior:
+haskell> replace 5 6 [1,2,3,4,5]
+[1,2,3,4,5]
+> replace 6 7 [1,2,3,4,5]
+[1,2,3,4,5]
+The examples show that when n is out of bounds, it should return the list unchanged - not throw an error.
+You're absolutely right that from a user experience perspective, throwing an error would be more informative! But for this assignment, you need to match the specified behavior. The assignment says:
+
+"Make sure that your functions work with the given tests."
+
+So even though returning the unchanged list silently isn't the most intuitive design choice, that's what the assignment requires. Sometimes in programming we have to implement specs as given, even if we'd design it differently ourselves!OH ok omg. I'm bad at details. XD And I'm overthinking this okFeb 3Haha no worries! Paying attention to details is actually a GOOD thing in programming - you just gotta make sure you're looking at the right details (the spec examples) instead of overthinking the logic. 😄
+So you've got:
+
+Base case 1: Empty list → return []
+Base case 2: n == 0 → this is where you do the replacement!
+Recursive case: n > 0 and list isn't empty → keep the current element and recurse with n-1
+
+Want to take a crack at writing it out?Ok so there's 2 base cases?Feb 3Yes! Two base cases:
+Base case 1: Empty list []
+
+Means you've run out of elements (n was beyond the list length)
+Return []
+
+Base case 2: n == 0
+
+Means you've found the position to replace!
+Return the new value v followed by the rest of the list
+
+Then your recursive case is when you have a non-empty list and n > 0:
+
+Keep the current element
+Recurse on the rest of the list with n-1
+
+Multiple base cases are totally normal in recursion! You need different stopping conditions for different situations.is that in examples in the slides?Feb 3Yes! Look at the nthElement example in the tail recursion slides:
+haskellnthElement [] n = error "nthElement': The input list is too short."
+nthElement (x:xs) 1 = x
+nthElement (x:xs) n = (nthElement xs (n-1))
+This has two base cases:
+
+Empty list: nthElement [] n = ...
+When you've counted down to 1: nthElement (x:xs) 1 = x
+
+Your replace function follows a very similar pattern! Instead of returning the element when n == 1, you'll be replacing it when n == 0.
+The pattern is the same - count down through the list, and handle both "ran out of list" and "found the target position" as separate base cases.So based on the example would it be something like replace ... ugh just do me a favor and give me the base casesFeb 3Alright, here are just the base cases:
+haskellreplace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+Now you need to add the recursive case for when n > 0 and the list isn't empty!"replace n val (x:xs) = x : replace (n-1) val xs"?Feb 3Perfect! That's exactly right!
+So putting it all together:
+haskellreplace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n v (x:xs) = x : replace (n-1) v xs
+Let's trace through an example to make sure you understand how it works:
+
+replace 2 'X' "abc"
+n=2, not 0, list not empty → 'a' : replace 1 'X' "bc"
+n=1, not 0, list not empty → 'a' : 'b' : replace 0 'X' "c"
+n=0 → BASE CASE 2! → 'a' : 'b' : 'X' : ""
+Result: "abX"
+
+Wait, that should be "abXc" not "abX". Let me re-trace:
+
+replace 0 'X' "c" → 'X' : "c" → "Xc"...
+
+Hmm, actually that would give us "abXc" when we wanted index 2 to be 'X' in "abc" (which should give "abX").
+Oh wait - "abc" only has indices 0,1,2 which are 'a','b','c'. So replace 2 should give "abX". Let me trace again:
+
+replace 0 'X' (c:[])  gives 'X' : [] which is just "X", losing the 'c'.
+
+Actually your solution looks good! Try testing it.replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n val (x:xs) = x : replace (n-1) val xsFeb 3Perfect! That's the complete solution. Now test it with the examples from the assignment:
+haskellreplace 3 40 [1, 2, 3, 4, 5, 6]  -- should give [1,2,3,40,5,6]
+replace 0 'X' "abcd"              -- should give "Xbcd"
+replace 5 6 [1,2,3,4,5]           -- should give [1,2,3,4,5]
+Load it up in GHCi and see if it works! And make sure you understand why it works - trace through one example mentally to see how the recursion builds up the new list.I forgot how to load : (Feb 3No worries!
+In your terminal/command prompt:
+bashghci HW1.hs
+Or if you're already in ghci:
+haskell:load HW1.hs
+Or the short version:
+haskell:l HW1.hs
+Then you can test your function:
+haskellreplace 3 40 [1,2,3,4,5,6]
+If you make changes to the file, reload it with:
+haskell:reload
+or
+haskell:rSo it replaced the 4th element because of the zero indexing. Is that correct?Feb 3Exactly! Yes, that's correct.
+With 0-based indexing:
+
+Index 0 → element 1
+Index 1 → element 2
+Index 2 → element 3
+Index 3 → element 4 ← this one gets replaced with 40
+Index 4 → element 5
+Index 5 → element 6
+
+So replace 3 40 [1,2,3,4,5,6] replaces the element at index 3 (which is the 4th element in human counting) with 40, giving you [1,2,3,40,5,6].
+You've got it! 🎉Ok so let's take a second and walk through this:
+"replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n val (x:xs) = x : replace (n-1) val xs"so the first base case is just if the list is empty or alternatively if we reach the end of the list, aka n > our list length.
+Second base case if when we have arrived at our intended n value and are changing the v.
+I'm following so farFeb 3Perfect! You've got it exactly right.
+Base case 1: replace n v [] = []
+
+Empty list OR we've recursed past the end (n was too big)
+Just return empty list
+
+Base case 2: replace 0 v (x:xs) = v : xs
+
+We've counted down to 0! This is our target position!
+Replace x with v, keep the rest of the list xs
+So we return v : xs (the new value cons'd onto the rest)
+
+Keep going - what about the recursive case?replace n val (x:xs) = x : replace (n-1) val xsOk so the function call and then assignment but what is the x : recursive call doing? What's the ":" doing? x is the head of the list and then we're calling the recursive function on the tail?Feb 3Yes! The : is the cons operator - it's how you build lists in Haskell.
+x : xs means "put x at the front of list xs"
+So in the recursive case:
+haskellreplace n val (x:xs) = x : replace (n-1) val xs
+You're saying:
+
+Keep the current element x (because we haven't reached index 0 yet)
+Cons it (:) onto the result of recursively processing the rest of the list
+The recursive call replace (n-1) val xs handles the tail with n decremented
+
+So you're building up a new list where:
+
+All elements before index n stay the same (kept via x :)
+The element at index n gets replaced (when n hits 0)
+All elements after index n stay the same (via xs in the base case)
+
+The cons operator is rebuilding the list piece by piece as the recursion unwinds!
