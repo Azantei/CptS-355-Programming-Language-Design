@@ -97,14 +97,16 @@ Groups consecutive elements into sublists where each sublist's sum is <= N.
 If an element is greater than N, it gets its own sublist.
 -}
 groupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
 groupSumtoN n list = 
-    let helper [] currentGroup currentSum 
-            | currentGroup == [] = [[]]
-            | otherwise = [currentGroup]
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
         
         helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
             | x > n = currentGroup : [x] : helper xs [] 0
             | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
-            | otherwise = currentGroup : helper xs [x] x
+            | otherwise = currentGroup : helper (x:xs) [] 0
     
     in helper list [] 0
+-- End of HW1.hs
