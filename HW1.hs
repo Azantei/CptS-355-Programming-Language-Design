@@ -106,6 +106,9 @@ groupSumtoN n list =
             | x > n && null currentGroup = [x] : helper xs [] 0
             | x > n = currentGroup : [x] : helper xs [] 0
             | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            -- FIX: Start fresh with x if currentGroup is empty
+            -- Prevent empty list creation
+            | null currentGroup = helper (x:xs) [x] x
             | otherwise = currentGroup : helper (x:xs) [] 0
     
     in helper list [] 0
