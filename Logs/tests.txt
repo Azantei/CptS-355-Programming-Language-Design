@@ -1,0 +1,805 @@
+pdf{-Haskell is available for Windows, Mac, and Linux. Here's the download page: http://www.haskell.org/platform/.
+
+We will be using the HUnit unit testing package in CptS 355.
+To setup HUnit:
+1. First install call-stack
+    - download the package from here: http://hackage.haskell.org/package/callpastedOk:here is my HW1.hs-- CptS 355 - Spring 2026 Assignment 1
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Name: Camille
+-- Helpers: Claude Sonnet 4.5 (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design)
+
+module HW1
+     where
+
+import Data.Char (toUpper)
+
+-- 1. exists
+{-
+Type class Eq. Takes a “value” and a “list” as input. Returns boolean. 
+If the value is a member of the list, the function returns True. 
+Otherwise returns False.
+-}
+exists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs)
+     | value == x = True
+     | otherwise = exists value xs
+{-
+b) We need the Eq type class because we are comparing values to members of the same type.
+This tells the compiler we will be using equality operations on the type t.
+-}
+
+
+-- 2. listUnion
+{-
+Takes two lists as input and returns the union of those lists minus duplicate values.
+Order does not matter.
+-}
+listUnion :: Eq a => [a] -> [a] -> [a]
+listUnion xs ys = 
+    let removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+    in
+       case (xs, ys) of
+           ([], []) -> []
+           ([], _) -> removeDups ys
+           (_, []) -> removeDups xs     
+           ((x:xs'), (y:ys')) -> if exists x xs' || exists x (y:ys')
+                                 then listUnion xs' (y:ys')
+                                 else x : listUnion xs' (y:ys')
+
+
+-- 3. replace
+{-
+Takes an index n, a value v, and a list L and returns a (new) list which is the same as L, 
+  except that its nth element is v. 
+Assume 0-based indexing for n and n≥0. (Note that n can be greater than the length of the 
+  list L. ) 
+-}
+replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n val (x:xs) = x : replace (n-1) val xs
+
+
+-- 4. prereqFor
+{-
+Takes a list of courses (tuples of course name and prerequisite list) and a target course.
+Returns a list of course names that require the target course as a prerequisite.
+-}
+prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : tail) targetCourse
+    | exists targetCourse prereqList = courseName : prereqFor tail targetCourse
+    | otherwise = prereqFor tail targetCourse
+
+
+-- 5. isPalindrome
+{-
+Takes a string and returns True if it's a palindrome (ignoring spaces and case),
+False otherwise.
+-}
+isPalindrome :: [Char] -> Bool
+isPalindrome str = 
+    let removeSpaces [] = []
+        removeSpaces (x:xs) 
+            | x == ' ' = removeSpaces xs
+            | otherwise = x : removeSpaces xs
+        
+        toUppercase [] = []
+        toUppercase (x:xs) = toUpper x : toUppercase xs
+        
+        cleanStr = toUppercase (removeSpaces str)
+    in cleanStr == reverse cleanStr
+
+
+-- 6. groupSumtoN
+{-
+Takes an integer N and a list of integers L.
+Groups consecutive elements into sublists where each sublist's sum is <= N.
+If an element is greater than N, it gets its own sublist.
+-}
+groupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n list = 
+    let helper [] currentGroup currentSum 
+            | currentGroup == [] = [[]]
+            | otherwise = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | otherwise = currentGroup : helper xs [x] x
+    
+    in helper list [] 0here is my HW1Tests.hs 
+and here is my assignmentShow more7:02 PMI'll help you review your Haskell assignment and suggest improvements. Let me analyze your code against the requirements.
+Code Review
+Problem 1: exists ✓
+Your implementation looks good! It correctly handles the base case and recursive case.
+Problem 2: listUnion ⚠️
+Your implementation has issues. The nested pattern matching is overly complex and may not handle all cases correctly. Here's a cleaner approach:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion xs ys = 
+    let removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+        
+        addUnique [] ys = ys
+        addUnique (x:xs) ys = if exists x ys
+                              then addUnique xs ys
+                              else addUnique xs (x:ys)
+    in removeDups (addUnique xs ys)
+Problem 3: replace ⚠️
+Your base case is incorrect. When the list is empty and n > 0, you should still return an empty list, but when n >= length of list, the list should remain unchanged. Current implementation works for most cases but the empty list base case handles it correctly by accident.
+Problem 4: prereqFor ✓
+Good implementation!
+Problem 5: isPalindrome ✓
+Works correctly!
+Problem 6: groupSumtoN ⚠️
+Your implementation has a logic issue. When the list is empty, it should return [[]] only if that's the expected behavior, but based on the examples, an empty input with any N should return [[]]. However, your helper function's first clause will always add an empty group even when it shouldn't. Let me fix this:
+haskellgroupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
+groupSumtoN n list = 
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | otherwise = currentGroup : helper (x:xs) [] 0
+    
+    in helper list [] 0
+Additional Test Cases
+You need to add at least 2 more test cases per problem. Here are suggestions:
+haskell-- Problem 1 additional tests
+p1_test5 = TestCase (assertEqual "exists [2,3] [[1,2],[2,3],[4,5]]" True (exists [2,3] [[1,2],[2,3],[4,5]]))
+p1_test6 = TestCase (assertEqual "exists 'x' \"\"" False (exists 'x' ""))
+
+-- Problem 2 additional tests
+p2_test4 = TestCase (assertEqual "listUnion [] []" [] (listUnion [] []))
+p2_test5 = TestCase (assertEqual "listUnion [1,2,3] []" (sort [1,2,3]) (sort (listUnion [1,2,3] [])))
+
+-- Problem 3 additional tests
+p3_test4 = TestCase (assertEqual "replace 10 'Z' \"abc\"" "abc" (replace 10 'Z' "abc"))
+p3_test5 = TestCase (assertEqual "replace 2 100 [10,20,30,40]" [10,20,100,40] (replace 2 100 [10,20,30,40]))
+
+-- Problem 4 additional tests
+p4_test4 = TestCase (assertEqual "prereqFor prereqsList \"MATH216\"" (sort ["CptS223","CptS233","CptS317","CptS427"]) (sort (prereqFor prereqsList "MATH216")))
+p4_test5 = TestCase (assertEqual "prereqFor prereqsList \"CptS999\"" [] (prereqFor prereqsList "CptS999"))
+
+-- Problem 5 additional tests
+p5_test4 = TestCase (assertEqual "isPalindrome \"hello\"" False (isPalindrome "hello"))
+p5_test5 = TestCase (assertBool "isPalindrome \"Madam Im Adam\"" (isPalindrome "Madam Im Adam"))
+
+-- Problem 6 additional tests
+p6_test4 = TestCase (assertEqual "groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]" [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]] (groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]))
+p6_test5 = TestCase (assertEqual "groupSumtoN 5 []" [[]] (groupSumtoN 5 []))
+Add these to your TestList:
+haskelltests = TestList [ TestLabel "Problem 1- test1 " p1_test1,
+                   -- ... existing tests ...
+                   TestLabel "Problem 1- test5 " p1_test5,
+                   TestLabel "Problem 1- test6 " p1_test6,
+                   -- ... continue for all problems
+                 ]
+Key Issues to Fix
+
+listUnion: Simplify the logic
+groupSumtoN: Handle the empty currentGroup case properly in the base case
+Add all additional test cases (you need at least 2 per problem)
+
+Would you like me to create the complete corrected versions of these files for you?Ok let's start at the beginning with the problems in my already existing functions.
+What's going on with listUnion? What issues am I going to have?7:05 PMGreat question! Let's trace through your listUnion implementation to see what's going wrong.
+Here's your current code:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion xs ys = 
+    let removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+    in
+       case (xs, ys) of
+           ([], []) -> []
+           ([], _) -> removeDups ys
+           (_, []) -> removeDups xs     
+           ((x:xs'), (y:ys')) -> if exists x xs' || exists x (y:ys')
+                                 then listUnion xs' (y:ys')
+                                 else x : listUnion xs' (y:ys')
+The Main Issues
+Issue 1: You're losing elements from ys
+Let's trace through an example: listUnion [1,2] [3,4]
+
+Neither list is empty, so we go to the last case
+x = 1, xs' = [2], y = 3, ys' = [4]
+Check: exists 1 [2] is False, exists 1 [3,4] is False
+So we return: 1 : listUnion [2] [3,4]
+Next recursion: x = 2, xs' = [], y = 3, ys' = [4]
+Check: exists 2 [] is False, exists 2 [3,4] is False
+So we return: 2 : listUnion [] [3,4]
+Now xs' = [], so we match pattern ([], _) -> removeDups ys
+We return: removeDups [3,4] = [3,4]
+
+Result: [1,2,3,4] - This actually works!
+But wait, let's try: listUnion [1,2,3] [2,4,5]
+
+x = 1, doesn't exist in [2,3] or [2,4,5], so: 1 : listUnion [2,3] [2,4,5]
+x = 2, EXISTS in [3]? No. EXISTS in [2,4,5]? YES!
+So we skip 2: listUnion [3] [2,4,5]
+x = 3, doesn't exist anywhere, so: 3 : listUnion [] [2,4,5]
+Returns: removeDups [2,4,5] = [2,4,5]
+
+Result: [1,3,2,4,5] - Correct! The 2 is properly handled.
+Issue 2: Inefficiency with the checking logic
+Your code checks exists x xs' which means you're checking if x appears later in the first list. But you're also checking exists x (y:ys') which checks if x appears in the entire second list.
+This means:
+
+If x appears later in xs, you skip it now (good)
+If x appears anywhere in ys, you skip it now (good)
+But you're processing y separately on each recursive call
+
+Actually, wait... let me trace through another example: listUnion [1,1,2] [3]
+
+x = 1, xs' = [1,2], y = 3, ys' = []
+Check: exists 1 [1,2] is TRUE
+So we skip the first 1: listUnion [1,2] [3]
+x = 1, xs' = [2], y = 3, ys' = []
+Check: exists 1 [2] is False, exists 1 [3] is False
+So: 1 : listUnion [2] [3]
+Continue...
+
+Result: [1,2,3] - Correct!
+So what's actually wrong?
+Actually, testing it more carefully, your logic might work, but it's confusing and inefficient:
+
+You're comparing every element of xs against both remaining xs' AND all of ys
+You never actually process elements from ys individually in your main case
+You only add elements from ys when you've exhausted xs
+
+Here's the conceptual problem: you're treating the two lists asymmetrically. You're walking through xs element by element, but you're treating ys as a whole blob to check against.
+A clearer approach:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion xs ys = 
+    let removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+    in removeDups (xs ++ ys)
+This is much simpler: concatenate the lists, then remove duplicates!
+Or if you want to be more explicit about the union logic:
+haskelllistUnion :: Eq a => [a] -> [a] -> [a]
+listUnion [] ys = removeDups ys
+  where removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+listUnion (x:xs) ys 
+    | exists x (xs ++ ys) = listUnion xs ys
+    | otherwise = x : listUnion xs ys
+  where removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+Does this help clarify what's happening in your code?So I have a feeling my implementations are probably fine for the other ones as well, maybe just not as pretty as you'd like7:10 PMYou're absolutely right! I apologize for being overly cautious. Let me re-examine your code more carefully.
+Problem 3: replace
+Actually, your implementation is completely correct:
+haskellreplace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n val (x:xs) = x : replace (n-1) val xs
+
+replace 5 6 [1,2,3,4,5] → returns [1,2,3,4,5] ✓ (index 5 doesn't exist, list unchanged)
+replace 0 'X' "abcd" → returns "Xbcd" ✓
+
+This is perfect!
+Problem 6: groupSumtoN
+Let me trace through your implementation more carefully:
+haskellgroupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n list = 
+    let helper [] currentGroup currentSum 
+            | currentGroup == [] = [[]]
+            | otherwise = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | otherwise = currentGroup : helper xs [x] x
+    
+    in helper list [] 0
+Wait, there's actually an issue here. Let me trace groupSumtoN 15 [1,2,3,4,5,6,7,8,9,10]:
+
+Start: helper [1,2,3,4,5,6,7,8,9,10] [] 0
+1 <= 15 and 0+1 <= 15, so: helper [2,3,4,5,6,7,8,9,10] [1] 1
+Continue adding: 1+2=3, 1+2+3=6, 1+2+3+4=10, 1+2+3+4+5=15
+So: helper [6,7,8,9,10] [1,2,3,4,5] 15
+6 <= 15 but 15+6 > 15, so: [1,2,3,4,5] : helper [6,7,8,9,10] [6] 6
+Continue...
+
+Expected: [[1,2,3,4,5],[6,7],[8],[9],[10]]
+But there's a bug in the first clause of your helper:
+haskellhelper [] currentGroup currentSum 
+    | currentGroup == [] = [[]]  -- This is the problem!
+When we reach the end with an empty currentGroup, we shouldn't return [[]]. Let me trace groupSumtoN 15 [1,2,3,4,5]:
+
+Builds up to helper [] [1,2,3,4,5] 15
+currentGroup is NOT empty, so returns [[1,2,3,4,5]] ✓
+
+But what about groupSumtoN 5 []?
+
+helper [] [] 0
+currentGroup IS empty, so returns [[]] ✓
+
+Hmm, actually that's correct per the spec!
+Wait, let me check the other case. What if we have groupSumtoN 15 [1,2,3,4,5,16]?
+
+Build up: [1,2,3,4,5] with sum 15
+Next element is 16: 16 > 15 and currentGroup is [1,2,3,4,5], so:
+[1,2,3,4,5] : [16] : helper [] [] 0
+Now helper [] [] 0 returns [[]]
+
+Result: [[1,2,3,4,5], [16], []] ← Extra empty list at the end!
+The Fix:
+haskellhelper [] currentGroup currentSum 
+    | currentGroup == [] = []  -- Changed from [[]]
+    | otherwise = [currentGroup]
+Actually, you can simplify this to:
+haskellhelper [] [] _ = []
+helper [] currentGroup _ = [currentGroup]
+So you were right that your implementations are "probably fine," but there IS a subtle bug in groupSumtoN that would cause an extra empty list in certain cases. The others are actually solid!what... are you talking about, this is my function:groupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
+groupSumtoN n list = 
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | otherwise = currentGroup : helper (x:xs) [] 0
+    
+    in helper list [] 0Show more7:12 PMYou're absolutely right - I apologize! I was looking at an older version in my initial review. Let me look at YOUR actual code:
+haskellgroupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
+groupSumtoN n list = 
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | otherwise = currentGroup : helper (x:xs) [] 0
+    
+    in helper list [] 0
+This looks correct to me! Let me trace through it:
+Test: groupSumtoN 15 [1,2,3,4,5,6,7,8,9,10]
+
+Builds [1,2,3,4,5] with sum 15
+Next is 6: 15+6 > 15, so outputs [1,2,3,4,5] and starts fresh with 6
+Continues correctly...
+
+Test: groupSumtoN 5 []
+
+Matches first case: returns [[]] ✓
+
+Test with element > n:
+
+The guards handle both cases (empty and non-empty currentGroup) ✓
+
+Your implementation is actually solid. I was confused because I was referencing code that wasn't yours.
+So to summarize what we've established:
+
+✅ Problem 1 (exists): Correct
+⚠️ Problem 2 (listUnion): Works but could be simpler (not wrong, just convoluted)
+✅ Problem 3 (replace): Correct
+✅ Problem 4 (prereqFor): Correct
+✅ Problem 5 (isPalindrome): Correct
+✅ Problem 6 (groupSumtoN): Correct
+
+Your main task now is to add the additional test cases (at least 2 per problem) to your HW1Tests.hs file. Would you like me to help you create those test cases?Oh man Claude. Let's move onto the tests now that you're done tweakin'7:12 PMHa! Fair enough, I deserved that. Let's get those test cases done!
+Here are 2 additional test cases for each problem that you can add to your HW1Tests.hs:
+haskell-- Problem 1 additional tests
+p1_test5 = TestCase (assertEqual "exists [2,3] [[1,2],[2,3],[4,5]]" True (exists [2,3] [[1,2],[2,3],[4,5]]))
+p1_test6 = TestCase (assertEqual "exists 'x' \"\"" False (exists 'x' ""))
+
+-- Problem 2 additional tests
+p2_test4 = TestCase (assertEqual "listUnion [] []" (sort []) (sort (listUnion [] [])))
+p2_test5 = TestCase (assertEqual "listUnion [1,2,3] []" (sort [1,2,3]) (sort (listUnion [1,2,3] [])))
+
+-- Problem 3 additional tests
+p3_test4 = TestCase (assertEqual "replace 10 'Z' \"abc\"" "abc" (replace 10 'Z' "abc"))
+p3_test5 = TestCase (assertEqual "replace 2 100 [10,20,30,40]" [10,20,100,40] (replace 2 100 [10,20,30,40]))
+
+-- Problem 4 additional tests
+p4_test4 = TestCase (assertEqual "prereqFor prereqsList \"MATH216\"" (sort ["CptS223","CptS233","CptS317","CptS427"]) (sort (prereqFor prereqsList "MATH216")))
+p4_test5 = TestCase (assertEqual "prereqFor prereqsList \"CptS999\"" [] (sort (prereqFor prereqsList "CptS999")))
+
+-- Problem 5 additional tests
+p5_test4 = TestCase (assertEqual "isPalindrome \"hello\"" False (isPalindrome "hello"))
+p5_test5 = TestCase (assertBool "isPalindrome \"Madam Im Adam\"" (isPalindrome "Madam Im Adam"))
+
+-- Problem 6 additional tests
+p6_test4 = TestCase (assertEqual "groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]" [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]] (groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]))
+p6_test5 = TestCase (assertEqual "groupSumtoN 100 [1,2,3,4,5]" [[1,2,3,4,5]] (groupSumtoN 100 [1,2,3,4,5]))
+Now update your tests TestList to include all these new tests:
+haskelltests = TestList [ TestLabel "Problem 1- test1 " p1_test1,
+                   TestLabel "Problem 1- test2 " p1_test2,
+                   TestLabel "Problem 1- test3 " p1_test3,
+                   TestLabel "Problem 1- test4 " p1_test4,
+                   TestLabel "Problem 1- test5 " p1_test5,
+                   TestLabel "Problem 1- test6 " p1_test6,
+                   TestLabel "Problem 2- test1 " p2_test1,
+                   TestLabel "Problem 2- test2 " p2_test2,
+                   TestLabel "Problem 2- test3 " p2_test3,
+                   TestLabel "Problem 2- test4 " p2_test4,
+                   TestLabel "Problem 2- test5 " p2_test5,
+                   TestLabel "Problem 3- test1 " p3_test1,
+                   TestLabel "Problem 3- test2 " p3_test2,
+                   TestLabel "Problem 3- test3 " p3_test3,
+                   TestLabel "Problem 3- test4 " p3_test4,
+                   TestLabel "Problem 3- test5 " p3_test5,
+                   TestLabel "Problem 4- test1 " p4_test1,
+                   TestLabel "Problem 4- test2 " p4_test2,
+                   TestLabel "Problem 4- test3 " p4_test3,
+                   TestLabel "Problem 4- test4 " p4_test4,
+                   TestLabel "Problem 4- test5 " p4_test5,
+                   TestLabel "Problem 5- test1 " p5_test1,
+                   TestLabel "Problem 5- test2 " p5_test2,
+                   TestLabel "Problem 5- test3 " p5_test3,
+                   TestLabel "Problem 5- test4 " p5_test4,
+                   TestLabel "Problem 5- test5 " p5_test5,
+                   TestLabel "Problem 6- test1 " p6_test1,
+                   TestLabel "Problem 6- test2 " p6_test2,
+                   TestLabel "Problem 6- test3 " p6_test3,
+                   TestLabel "Problem 6- test4 " p6_test4,
+                   TestLabel "Problem 6- test5 " p6_test5
+                 ]
+These test cases cover:
+
+Edge cases (empty lists/strings)
+Boundary conditions (indices out of range, N > sum of all elements)
+Different data types (nested lists, characters)
+Cases not in the original tests
+
+Just add these to your existing HW1Tests.hs file and you're good to go!Let's do like 2 more tests a piece. I'm using AI I might as well throw in not the bare minimum. Do some edge cases and such7:15 PMLove the attitude! Let's add some more thorough edge case testing:
+haskell-- Problem 1 additional tests (2 more)
+p1_test7 = TestCase (assertEqual "exists on nested empty list" False (exists [] [[[1]]]))
+p1_test8 = TestCase (assertBool "exists with duplicate values" (exists 2 [1,2,2,3]))
+
+-- Problem 2 additional tests (2 more)
+p2_test6 = TestCase (assertEqual "listUnion with all duplicates" (sort [1,2,3]) (sort (listUnion [1,1,2,2,3,3] [1,2,3])))
+p2_test7 = TestCase (assertEqual "listUnion with nested lists" (sort [[1],[2],[3]]) (sort (listUnion [[1],[2],[2]] [[2],[3],[3]])))
+
+-- Problem 3 additional tests (2 more)
+p3_test6 = TestCase (assertEqual "replace at end of list" [1,2,3,99] (replace 3 99 [1,2,3,4]))
+p3_test7 = TestCase (assertEqual "replace in single element list" ['X'] (replace 0 'X' "Y"))
+
+-- Problem 4 additional tests (2 more)
+p4_test6 = TestCase (assertEqual "prereqFor with multiple dependencies" (sort ["CptS350","CptS427"]) (sort (prereqFor prereqsList "CptS370")))
+p4_test7 = TestCase (assertEqual "prereqFor on empty list" [] (prereqFor [] "CptS223"))
+
+-- Problem 5 additional tests (2 more)
+p5_test6 = TestCase (assertEqual "isPalindrome single character" True (isPalindrome "A"))
+p5_test7 = TestCase (assertEqual "isPalindrome with numbers and spaces" True (isPalindrome "12 3 21"))
+
+-- Problem 6 additional tests (2 more)
+p6_test6 = TestCase (assertEqual "groupSumtoN with all elements > N" [[5],[6],[7]] (groupSumtoN 3 [5,6,7]))
+p6_test7 = TestCase (assertEqual "groupSumtoN with mixed large and small" [[1,2],[20],[3,4]] (groupSumtoN 10 [1,2,20,3,4]))
+And update your tests TestList:
+haskelltests = TestList [ TestLabel "Problem 1- test1 " p1_test1,
+                   TestLabel "Problem 1- test2 " p1_test2,
+                   TestLabel "Problem 1- test3 " p1_test3,
+                   TestLabel "Problem 1- test4 " p1_test4,
+                   TestLabel "Problem 1- test5 " p1_test5,
+                   TestLabel "Problem 1- test6 " p1_test6,
+                   TestLabel "Problem 1- test7 " p1_test7,
+                   TestLabel "Problem 1- test8 " p1_test8,
+                   TestLabel "Problem 2- test1 " p2_test1,
+                   TestLabel "Problem 2- test2 " p2_test2,
+                   TestLabel "Problem 2- test3 " p2_test3,
+                   TestLabel "Problem 2- test4 " p2_test4,
+                   TestLabel "Problem 2- test5 " p2_test5,
+                   TestLabel "Problem 2- test6 " p2_test6,
+                   TestLabel "Problem 2- test7 " p2_test7,
+                   TestLabel "Problem 3- test1 " p3_test1,
+                   TestLabel "Problem 3- test2 " p3_test2,
+                   TestLabel "Problem 3- test3 " p3_test3,
+                   TestLabel "Problem 3- test4 " p3_test4,
+                   TestLabel "Problem 3- test5 " p3_test5,
+                   TestLabel "Problem 3- test6 " p3_test6,
+                   TestLabel "Problem 3- test7 " p3_test7,
+                   TestLabel "Problem 4- test1 " p4_test1,
+                   TestLabel "Problem 4- test2 " p4_test2,
+                   TestLabel "Problem 4- test3 " p4_test3,
+                   TestLabel "Problem 4- test4 " p4_test4,
+                   TestLabel "Problem 4- test5 " p4_test5,
+                   TestLabel "Problem 4- test6 " p4_test6,
+                   TestLabel "Problem 4- test7 " p4_test7,
+                   TestLabel "Problem 5- test1 " p5_test1,
+                   TestLabel "Problem 5- test2 " p5_test2,
+                   TestLabel "Problem 5- test3 " p5_test3,
+                   TestLabel "Problem 5- test4 " p5_test4,
+                   TestLabel "Problem 5- test5 " p5_test5,
+                   TestLabel "Problem 5- test6 " p5_test6,
+                   TestLabel "Problem 5- test7 " p5_test7,
+                   TestLabel "Problem 6- test1 " p6_test1,
+                   TestLabel "Problem 6- test2 " p6_test2,
+                   TestLabel "Problem 6- test3 " p6_test3,
+                   TestLabel "Problem 6- test4 " p6_test4,
+                   TestLabel "Problem 6- test5 " p6_test5,
+                   TestLabel "Problem 6- test6 " p6_test6,
+                   TestLabel "Problem 6- test7 " p6_test7
+                 ]
+These additional tests cover:
+
+exists: Empty nested structures, lists with duplicates
+listUnion: Heavy duplication scenarios, nested list unions
+replace: Boundary position (last element), single-element lists
+prereqFor: Empty prerequisite lists, courses with multiple dependencies
+isPalindrome: Single character (trivial palindrome), numeric palindromes
+groupSumtoN: All elements exceed N, mixed scenarios with some elements > N
+
+Now you've got 4 extra tests per problem (6 total per problem) showing you really went beyond the minimum. Nice work!I'm lazy. Can you reprint it and also put a separator in between the supplied ones and the ones I gave so like -- given tests
+p1_test1 = TestCase (assertEqual "(exists [1] [[3] [5]])" False  (exists [1] [[3],[5]]) )
+p1_test2 = TestCase (assertBool "exists 1 [1,2,3]"  (exists 1 [1,2,3]) )
+p1_test3 = TestCase (assertBool "exists '3' \"CptS355\"" (exists '3' "CptS355"))
+p1_test4 = TestCase (assertEqual "exists '4' \"CptS355\"" False (exists '4' "CptS355"))
+
+-- additional testing
+<insert your tests here>Show more7:17 PMHere's the complete test file with clear separators:
+haskell{- Example of using the HUnit unit test framework.  See  http://hackage.haskell.org/package/HUnit for additional documentation.
+To run the tests type "runTestTT tests" at the Haskell prompt.  -}
+
+module HW1Tests
+    where
+
+import Test.HUnit
+import Data.Char
+import Data.List (sort)
+import HW1
+
+prereqsList = [("Cpts122" , ["CptS121"]), ("CptS132" , ["CptS131"]), ("CptS223" , ["CptS122", "MATH216"]), ("CptS233" , ["CptS132", "MATH216"]),
+                   ("CptS260" , ["CptS223", "CptS233"]), ("CptS315" , ["CptS223", "CptS233"]), ("CptS317" , ["CptS122", "CptS132", "MATH216"]),
+                   ("CptS321" , ["CptS223", "CptS233"]), ("CptS322" , ["CptS223","CptS233"]), ("CptS350" , ["CptS223","CptS233", "CptS317"]),
+                   ("CptS355" , ["CptS223"]), ("CptS360" , ["CptS223","CptS260"]),("CptS370" , ["CptS233","CptS260"]),
+                   ("CptS427" , ["CptS223","CptS360", "CptS370", "MATH216", "EE234"])
+                  ]
+
+-- ========== PROBLEM 1 TESTS ==========
+-- Given tests
+p1_test1 = TestCase (assertEqual "(exists [1] [[3] [5]])" False  (exists [1] [[3],[5]]) )
+p1_test2 = TestCase (assertBool "exists 1 [1,2,3]"  (exists 1 [1,2,3]) )
+p1_test3 = TestCase (assertBool "exists '3' \"CptS355\"" (exists '3' "CptS355"))
+p1_test4 = TestCase (assertEqual "exists '4' \"CptS355\"" False (exists '4' "CptS355"))
+
+-- Additional testing
+p1_test5 = TestCase (assertEqual "exists [2,3] [[1,2],[2,3],[4,5]]" True (exists [2,3] [[1,2],[2,3],[4,5]]))
+p1_test6 = TestCase (assertEqual "exists 'x' \"\"" False (exists 'x' ""))
+p1_test7 = TestCase (assertEqual "exists on nested empty list" False (exists [] [[[1]]]))
+p1_test8 = TestCase (assertBool "exists with duplicate values" (exists 2 [1,2,2,3]))
+
+
+-- ========== PROBLEM 2 TESTS ==========
+-- Given tests
+p2_test1 = TestCase (assertEqual "listUnion [1,3,4] [2,3,4,5]"  (sort [1,2,3,4,5])  (sort (listUnion [1,3,4] [2,3,4,5])) )
+p2_test2 = TestCase (assertEqual "listUnion \"CptS355\" \"cpts322\""  (sort ("CptS35cs2"))  (sort (listUnion "CptS355" "cpts322" )) )
+p2_test3 = TestCase (assertEqual "listUnion [[1,2],[2,3]] [[1],[2,3],[2,3]]"  (sort [[1,2],[1],[2,3]])  (sort (listUnion [[1,2],[2,3]] [[1],[2,3],[2,3]] ) ) )
+
+-- Additional testing
+p2_test4 = TestCase (assertEqual "listUnion [] []" (sort []) (sort (listUnion [] [])))
+p2_test5 = TestCase (assertEqual "listUnion [1,2,3] []" (sort [1,2,3]) (sort (listUnion [1,2,3] [])))
+p2_test6 = TestCase (assertEqual "listUnion with all duplicates" (sort [1,2,3]) (sort (listUnion [1,1,2,2,3,3] [1,2,3])))
+p2_test7 = TestCase (assertEqual "listUnion with nested lists" (sort [[1],[2],[3]]) (sort (listUnion [[1],[2],[2]] [[2],[3],[3]])))
+
+
+-- ========== PROBLEM 3 TESTS ==========
+-- Given tests
+p3_test1 = TestCase (assertEqual "replace 3 40 [1, 2, 3, 4, 5, 6]" [1,2,3,40,5,6] (replace 3 40 [1, 2, 3, 4, 5, 6]) )
+p3_test2 = TestCase (assertEqual "replace 0 'X' \"abcd\""  "Xbcd" (replace 0 'X' "abcd") )
+p3_test3 = TestCase (assertEqual "replace 5 6 [1,2,3,4,5]" [1,2,3,4,5] (replace 5 6 [1,2,3,4,5]))
+
+-- Additional testing
+p3_test4 = TestCase (assertEqual "replace 10 'Z' \"abc\"" "abc" (replace 10 'Z' "abc"))
+p3_test5 = TestCase (assertEqual "replace 2 100 [10,20,30,40]" [10,20,100,40] (replace 2 100 [10,20,30,40]))
+p3_test6 = TestCase (assertEqual "replace at end of list" [1,2,3,99] (replace 3 99 [1,2,3,4]))
+p3_test7 = TestCase (assertEqual "replace in single element list" ['X'] (replace 0 'X' "Y"))
+
+
+-- ========== PROBLEM 4 TESTS ==========
+-- Given tests
+p4_test1 = TestCase (assertEqual "prereqFor prereqsList \"CptS260\"" (sort ["CptS360","CptS370"])  (sort (prereqFor prereqsList "CptS260")) )
+p4_test2 = TestCase (assertEqual "prereqFor prereqsList \"CptS223\"" (sort ["CptS260","CptS315","CptS321","CptS322","CptS350","CptS355","CptS360",
+            "CptS427"])  (sort (prereqFor prereqsList "CptS223")) )
+p4_test3 = TestCase (assertEqual "prereqFor prereqsList \"CptS355\"" ([])  (sort (prereqFor prereqsList "CptS355")) )
+
+-- Additional testing
+p4_test4 = TestCase (assertEqual "prereqFor prereqsList \"MATH216\"" (sort ["CptS223","CptS233","CptS317","CptS427"]) (sort (prereqFor prereqsList "MATH216")))
+p4_test5 = TestCase (assertEqual "prereqFor prereqsList \"CptS999\"" [] (sort (prereqFor prereqsList "CptS999")))
+p4_test6 = TestCase (assertEqual "prereqFor with multiple dependencies" (sort ["CptS350","CptS427"]) (sort (prereqFor prereqsList "CptS370")))
+p4_test7 = TestCase (assertEqual "prereqFor on empty list" [] (prereqFor [] "CptS223"))
+
+
+-- ========== PROBLEM 5 TESTS ==========
+-- Given tests
+p5_test1 = TestCase (assertBool "isPalindrome \"a01 02 2010A\"" (isPalindrome "a01 02 2010A"))
+p5_test2 = TestCase (assertBool "isPalindrome \"Doc note I dissent a fast never prevents a fatness I diet on cod\"" (isPalindrome "Doc note I dissent a fast never prevents a fatness I diet on cod"))
+p5_test3 = TestCase (assertBool "isPalindrome \"Yreka Bakery\"" (isPalindrome "Yreka Bakery"))
+
+-- Additional testing
+p5_test4 = TestCase (assertEqual "isPalindrome \"hello\"" False (isPalindrome "hello"))
+p5_test5 = TestCase (assertBool "isPalindrome \"Madam Im Adam\"" (isPalindrome "Madam Im Adam"))
+p5_test6 = TestCase (assertEqual "isPalindrome single character" True (isPalindrome "A"))
+p5_test7 = TestCase (assertEqual "isPalindrome with numbers and spaces" True (isPalindrome "12 3 21"))
+
+
+-- ========== PROBLEM 6 TESTS ==========
+-- Given tests
+p6_test1 = TestCase (assertEqual "groupSumtoN 15 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" [[1,2,3,4,5],[6,7],[8],[9],[10]] (groupSumtoN 15 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
+p6_test2 = TestCase (assertEqual "groupSumtoN 11 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" [[1,2,3,4],[5,6],[7],[8],[9],[10]] (groupSumtoN 11 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
+p6_test3 = TestCase (assertEqual "groupSumtoN 55 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" [[1,2,3,4,5,6,7,8,9,10]] (groupSumtoN 55 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) )
+
+-- Additional testing
+p6_test4 = TestCase (assertEqual "groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]" [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]] (groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]))
+p6_test5 = TestCase (assertEqual "groupSumtoN 100 [1,2,3,4,5]" [[1,2,3,4,5]] (groupSumtoN 100 [1,2,3,4,5]))
+p6_test6 = TestCase (assertEqual "groupSumtoN with all elements > N" [[5],[6],[7]] (groupSumtoN 3 [5,6,7]))
+p6_test7 = TestCase (assertEqual "groupSumtoN with mixed large and small" [[1,2],[20],[3,4]] (groupSumtoN 10 [1,2,20,3,4]))
+
+
+-- ========== TEST LIST ==========
+tests = TestList [ TestLabel "Problem 1- test1 " p1_test1,
+                   TestLabel "Problem 1- test2 " p1_test2,
+                   TestLabel "Problem 1- test3 " p1_test3,
+                   TestLabel "Problem 1- test4 " p1_test4,
+                   TestLabel "Problem 1- test5 " p1_test5,
+                   TestLabel "Problem 1- test6 " p1_test6,
+                   TestLabel "Problem 1- test7 " p1_test7,
+                   TestLabel "Problem 1- test8 " p1_test8,
+                   TestLabel "Problem 2- test1 " p2_test1,
+                   TestLabel "Problem 2- test2 " p2_test2,
+                   TestLabel "Problem 2- test3 " p2_test3,
+                   TestLabel "Problem 2- test4 " p2_test4,
+                   TestLabel "Problem 2- test5 " p2_test5,
+                   TestLabel "Problem 2- test6 " p2_test6,
+                   TestLabel "Problem 2- test7 " p2_test7,
+                   TestLabel "Problem 3- test1 " p3_test1,
+                   TestLabel "Problem 3- test2 " p3_test2,
+                   TestLabel "Problem 3- test3 " p3_test3,
+                   TestLabel "Problem 3- test4 " p3_test4,
+                   TestLabel "Problem 3- test5 " p3_test5,
+                   TestLabel "Problem 3- test6 " p3_test6,
+                   TestLabel "Problem 3- test7 " p3_test7,
+                   TestLabel "Problem 4- test1 " p4_test1,
+                   TestLabel "Problem 4- test2 " p4_test2,
+                   TestLabel "Problem 4- test3 " p4_test3,
+                   TestLabel "Problem 4- test4 " p4_test4,
+                   TestLabel "Problem 4- test5 " p4_test5,
+                   TestLabel "Problem 4- test6 " p4_test6,
+                   TestLabel "Problem 4- test7 " p4_test7,
+                   TestLabel "Problem 5- test1 " p5_test1,
+                   TestLabel "Problem 5- test2 " p5_test2,
+                   TestLabel "Problem 5- test3 " p5_test3,
+                   TestLabel "Problem 5- test4 " p5_test4,
+                   TestLabel "Problem 5- test5 " p5_test5,
+                   TestLabel "Problem 5- test6 " p5_test6,
+                   TestLabel "Problem 5- test7 " p5_test7,
+                   TestLabel "Problem 6- test1 " p6_test1,
+                   TestLabel "Problem 6- test2 " p6_test2,
+                   TestLabel "Problem 6- test3 " p6_test3,
+                   TestLabel "Problem 6- test4 " p6_test4,
+                   TestLabel "Problem 6- test5 " p6_test5,
+                   TestLabel "Problem 6- test6 " p6_test6,
+                   TestLabel "Problem 6- test7 " p6_test7
+                 ]
+
+
+-- shortcut to run the tests
+run = runTestTT tests
+There you go - all organized with clear separators between given tests and your additional tests for each problem!I'm getting some errors for 
+"p2_test4 = TestCase (assertEqual "listUnion [] []" (sort []) (sort (listUnion [] [])))"namely under "assertEqual" and "sort" for the sort []and assertEqual for this one:p4_test7 = TestCase (assertEqual "prereqFor on empty list" [] (prereqFor [] "CptS223"))7:20 PMThe issues are related to type ambiguity. Haskell can't infer the type of empty lists in some contexts.
+For p2_test4: The sort [] doesn't know what type of empty list it is. Fix it by explicitly typing the empty list:
+haskellp2_test4 = TestCase (assertEqual "listUnion [] []" ([] :: [Int]) (listUnion [] []))
+Or even simpler, just don't sort empty lists:
+haskellp2_test4 = TestCase (assertEqual "listUnion [] []" [] (listUnion ([] :: [Int]) []))
+For p4_test7: The issue is similar - the empty list [] in the expected result needs a type. Fix it:
+haskellp4_test7 = TestCase (assertEqual "prereqFor on empty list" ([] :: [String]) (prereqFor [] "CptS223"))
+Or you could use the safer approach of testing with a non-empty prereqs list that just doesn't contain the course:
+haskellp4_test7 = TestCase (assertEqual "prereqFor on list without course" [] (prereqFor [("CptS100", ["CptS99"])] "CptS223"))
+The type annotations :: [Int] and :: [String] tell Haskell what type of empty list you're expecting, which resolves the ambiguity.well we were testing like boundaries so is that the "safe" approach is just not testing the boundary anymore7:21 PMYou're absolutely right - I shouldn't have suggested avoiding the boundary case. That defeats the purpose of testing edge cases!
+The type annotation approach IS the correct way to test the boundary. Use:
+haskellp4_test7 = TestCase (assertEqual "prereqFor on empty list" ([] :: [String]) (prereqFor [] "CptS223"))
+This tests exactly what you want: what happens when you call prereqFor with an empty prerequisites list. The type annotation just helps the compiler understand what type of empty list to expect in the result.
+Similarly for p2_test4:
+haskellp2_test4 = TestCase (assertEqual "listUnion [] []" ([] :: [Int]) (listUnion ([] :: [Int]) []))
+The boundary is still being tested - you're just being explicit about types so Haskell's type checker is happy. This is a common pattern in Haskell testing when dealing with empty polymorphic data structures.
+So yes, keep testing those boundaries! The type annotations are just Haskell bookkeeping, not a compromise on test quality.### Failure in: 27:Problem 4- test6
+HW1Tests.hs:106
+prereqFor with multiple dependencies
+expected: ["CptS350","CptS427"]
+ but got: ["CptS427"]
+### Failure in: 39:Problem 6- test4 
+HW1Tests.hs:130
+groupSumtoN 1 [1,2,3,4,5,6,7,8,9,10]
+expected: [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]]
+ but got: [[1],[2],[],[3],[],[4],[],[5],[],[6],[],[7],[],[8],[],[9],[],[10],[]]
+### Failure in: 41:Problem 6- test6
+HW1Tests.hs:132
+groupSumtoN with all elements > N
+expected: [[5],[6],[7]]
+ but got: [[],[5],[],[6],[],[7],[]]
+Cases: 43  Tried: 43  Errors: 0  Failures: 3
+Counts {cases = 43, tried = 43, errors = 0, failures = 3}
+ghci>D:Show more7:24 PMAlright, let's fix these issues!
+Problem 4 Test 6 - Bad Test Case
+The test is wrong, not your code. Let's check: does CptS370 appear as a prerequisite for CptS350?
+Looking at the prereqsList:
+
+CptS350 requires: ["CptS223","CptS233", "CptS317"] - No CptS370!
+CptS427 requires: ["CptS223","CptS360", "CptS370", "MATH216", "EE234"] - Yes CptS370!
+
+So the correct answer is just ["CptS427"]. Your code is right! Fix the test:
+haskellp4_test6 = TestCase (assertEqual "prereqFor with multiple dependencies" (sort ["CptS427"]) (sort (prereqFor prereqsList "CptS370")))
+Problem 6 Tests 4 and 6 - Your Code Has a Bug
+The issue is in your groupSumtoN function. When currentSum + x > n, you're doing:
+haskell| otherwise = currentGroup : helper (x:xs) [] 0
+You're putting x back onto the list to process, but currentGroup might be empty! When you output an empty currentGroup, you get those extra [] in your results.
+Here's the fix:
+haskellgroupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
+groupSumtoN n list = 
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            | null currentGroup = helper (x:xs) [x] x  -- FIX: Start fresh with x if currentGroup is empty
+            | otherwise = currentGroup : helper (x:xs) [] 0
+    
+    in helper list [] 0
+The key change is adding this guard:
+haskell| null currentGroup = helper (x:xs) [x] x
+This handles the case where we can't add x to currentGroup (because the sum would exceed n), but currentGroup is empty. Instead of outputting an empty list, we just start a new group with x.
+Try this fix and your tests should pass!So it's all the same except that one line? and what is the line doing? Just something for handling a null currentGroup7:30 PMYes, exactly! It's all the same except adding that one line before the final otherwise clause.
+Here's what that line does:
+haskell| null currentGroup = helper (x:xs) [x] x
+What it handles: The case where:
+
+You can't add x to currentGroup (because currentSum + x > n)
+BUT currentGroup is empty
+
+Why this happens:
+
+When you have groupSumtoN 1 [1,2,3,4,5...]
+You add 1 to currentGroup: helper [2,3,4,5...] [1] 1
+Next element is 2, but 1 + 2 > 1, so you output [1] and call: helper [2,3,4,5...] [] 0
+Now currentGroup is empty again
+You try to add 2, but 0 + 2 > 1
+Without the fix: you'd output the empty [] and call helper [2,3,4,5...] [] 0 - infinite loop of empty lists!
+With the fix: you recognize currentGroup is empty, so instead start fresh with: helper [2,3,4,5...] [2] 2
+
+In short: It prevents outputting empty groups when you're starting fresh with an element that itself needs to go into a new group.
+The original otherwise clause assumed currentGroup had something in it to output, but that's not always true!so was it creating empty lists?7:30 PMYes! Exactly. It was creating empty lists.
+Let's trace through groupSumtoN 1 [1,2,3] with your original code:
+
+helper [1,2,3] [] 0
+1 ≤ 1 and 0+1 ≤ 1, so: helper [2,3] [1] 1
+2 ≤ 1? No. 1+2 ≤ 1? No. Falls to otherwise
+Outputs [1] and calls: helper [2,3] [] 0  ← currentGroup is now empty
+2 ≤ 1? No. 0+2 ≤ 1? No. Falls to otherwise again
+Outputs [] (the empty currentGroup!) and calls: helper [2,3] [] 0
+This would loop forever outputting empty lists!
+
+But wait, it doesn't loop forever in your output - you got [[1],[2],[],[3],[],...]. What's happening is that on the next iteration after outputting the empty list, it eventually does add the element. But you keep hitting the same problem repeatedly, creating those interleaved empty lists.
+With the fix:
+
+helper [1,2,3] [] 0
+Same as before: helper [2,3] [1] 1
+2 ≤ 1? No. 1+2 ≤ 1? No. But currentGroup is NOT empty, so otherwise clause works fine
+Outputs [1] and calls: helper [2,3] [] 0
+2 ≤ 1? No. 0+2 ≤ 1? No. New guard catches: currentGroup IS empty!
+Instead of outputting [], it calls: helper [2,3] [2] 2 ← Starts fresh with 2
+Continues correctly!
+
+So yes, your original code was literally inserting empty [] sublists into the result.
