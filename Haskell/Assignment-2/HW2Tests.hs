@@ -22,7 +22,7 @@ The arguments to 'assertBool' are:
 -}
 
 -- BEGIN TESTS 
-{- p1a_test1 = TestCase (assertEqual "merge2 [2,5,6,8,9] [1,3,4,5,7,8,10]" [1,2,3,4,5,5,6,7,8,8,9,10]  (merge2 [2,5,6,8,9] [1,3,4,5,7,8,10]) )
+p1a_test1 = TestCase (assertEqual "merge2 [2,5,6,8,9] [1,3,4,5,7,8,10]" [1,2,3,4,5,5,6,7,8,8,9,10]  (merge2 [2,5,6,8,9] [1,3,4,5,7,8,10]) )
 
 p1b_test1 = TestCase (assertEqual "merge2Tail [2,5,6,8,9] [1,3,4,5,7,8,10]" [1,2,3,4,5,5,6,7,8,8,9,10]  (merge2Tail [2,5,6,8,9] [1,3,4,5,7,8,10]) )
 
@@ -93,5 +93,5 @@ tests = TestList [ TestLabel "Problem 1a - test1 " p1a_test1,
 
 -- shortcut to run the tests
 run = runTestTT  tests
--}
+
 -- END TESTS

@@ -15,7 +15,7 @@ module HW2
 
 {- 1-  merge2 & merge2Tail & mergeN - 22% -}
 
--- merge2
+-- merge2 - 6%
 -- Takes two sorted lists and merges them into one sorted list.
 merge2 :: Ord a => [a] -> [a] -> [a]
 -- Base cases: if one list is empty, return the other list
@@ -30,7 +30,7 @@ merge2 (x:xs) (y:ys)
 
 -----------------------------------------------------------------
 
--- merge2Tail
+-- merge2Tail - 10%
 -- Uses tail recursion to take two sorted lists and merges them into one sorted list.
 merge2Tail :: Ord a => [a] -> [a] -> [a]
 
@@ -57,7 +57,7 @@ revAppend (x:xs) ys = revAppend xs (x:ys)
 
 -----------------------------------------------------------------
 
--- mergeN
+-- mergeN - 6%
 -- Takes a list of sorted lists and merges them all into one sorted list. 
 mergeN :: Ord a => [[a]] -> [a]
 -- use foldl to repeatedly apply merge2 to the list of lists,
@@ -70,7 +70,7 @@ mergeN lists = foldl merge2 [] lists
 
 {- 2 - getInRange & countInRange - 18% -}
 
--- getInRange
+-- getInRange - 6%
 -- Takes two values: v1 and v2, and a list. Returns the elements that are strictly between those values.
 getInRange :: Ord a => a -> a -> [a] -> [a]
 -- filter: (predicate function) (list to filter)
@@ -80,7 +80,7 @@ getInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iL
 
 -----------------------------------------------------------------
 
--- countInRange
+-- countInRange - 12%
 -- Takes two values: v1 and v2, and a nested list. Returns the total count of elements strictly between those values across all sublists.
 countInRange :: Ord a => a -> a -> [[a]] -> Int
 -- Use function composition: start with innermost function to map the in-range values. 
@@ -95,7 +95,8 @@ countInRange v1 v2 iL = foldl (+) 0 (map length (map (getInRange v1 v2) iL))
 
 data LengthUnit =  INCH  Int | FOOT  Int | YARD  Int
                    deriving (Show, Read, Eq)
--- addLengths
+
+-- addLengths - 10%
 -- Adds two LengthUnit values together and returns the result as an INCH constructor.
 
 -- Function to convert each constructor to inches
@@ -111,7 +112,7 @@ addLengths l1 l2 = INCH (toInches l1 + toInches l2)
 
 -----------------------------------------------------------------
 
--- addAllLengths
+-- addAllLengths - 8%
 -- Takes a nested list of LengthUnit values and returns the total length as an INCH constructor.
 
 addAllLengths :: [[LengthUnit]] -> LengthUnit
@@ -123,12 +124,12 @@ addAllLengths iL = foldl addLengths (INCH 0) (map (foldl addLengths (INCH 0)) iL
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
-{-4 - sumTree and createSumTree - 22%-}
+{-4 - sumTree and createSumTree - 23%-}
 
 data Tree a = LEAF a | NODE a  (Tree a)  (Tree a)
               deriving (Show, Read, Eq)
 
--- sumTree
+-- sumTree - 8%
 -- Takes a Tree of Nums and returns the sum of all the leaf values in the tree.
 sumTree :: Num p => Tree p -> p
 sumTree (LEAF a) = a
@@ -136,7 +137,7 @@ sumTree (NODE a left right) = sumTree left + sumTree right
 
 -----------------------------------------------------------------
 
---createSumTree
+--createSumTree - 15%
 -- Rebuilds the tree with each node storing the sum of its leaf values below it.
 createSumTree :: Num a => Tree a -> Tree a
 -- Base case: Leaf
@@ -146,13 +147,35 @@ createSumTree (LEAF a) = LEAF a
 -- Rebuilds the tree, using sumTree to calculate and store the sum of leaf values in each node.
 createSumTree (NODE a left right) = NODE (sumTree left + sumTree right) (createSumTree left) (createSumTree right)
 
+-----------------------------------------------------------------
+-----------------------------------------------------------------
 
-{-5 - foldListTree - 20%-}
+{-5 - foldListTree - 15%-}
 data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
                   deriving (Show, Read, Eq)
 
+-- Takes a binary function, a base value, and a ListTree.
+-- Folds all the leaf values in the tree left to right using the binary function and base value.
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+-- Base case: fold the list of values in the leaf using the binary function and base value.
+foldListTree f base (ListLEAF xs) = foldl f base xs
+-- Otherwise, map foldListTree over each subtree to get a list of results,
+-- then fold that results list into a single value using the binary function and base value.
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)
 
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 
-{- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -}
+{- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -  4% -}
+-- Tree Integer example (3+ levels)
+myTree :: Tree Integer
+myTree = NODE 0
+    (NODE 0 (LEAF 2) (NODE 0 (LEAF 3) (LEAF 4)))
+    (NODE 0 (LEAF 5) (LEAF 6))
+
+-- ListTree example (3+ levels)
+myListTree :: ListTree Integer
+myListTree = ListNODE 
+    [ ListNODE [ ListLEAF [1,2,3], ListLEAF [4,5] ],
+      ListNODE [ ListLEAF [6,7], ListNODE [ListLEAF [8,9], ListLEAF [10]] ],
+      ListLEAF [11,12] ]

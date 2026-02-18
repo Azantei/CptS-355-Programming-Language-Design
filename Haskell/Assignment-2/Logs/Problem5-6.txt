@@ -1,0 +1,379 @@
+
+Cpts355_Assignment2_Haskell.pdf
+pdf
+
+
+HW2.hs
+hs
+
+
+-- CptS 355 - Spring 2026 Assignment 2 -- Please include your name and the names of the students with whom you discussed any of the problems in this homework -- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched
+
+pasted
+
+
+Cpts355_Assignment2_Haskell.pdf pdf HW2.hs hs -- CptS 355 - Spring 2026 Assignment 2 -- Please include your name and the names of the students with whom you discussed any of the problems in this homework -- Also include a statement identifying the extent of your AI use (to include "None"
+
+pasted
+
+Ok so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that. #1 is done, let's move onto #5 and 6. I'll paste my #1 -4 here. I'd like to be walked through a bit so I'm not just being given the answer, I'll give you the last conversation for example
+
+5:41 PM
+Good luck on the exam tomorrow! Let's tackle problems 5 and 6.
+
+Problem 5 is foldListTree. Here's the data type you're working with:
+
+haskell
+data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
+So unlike the binary tree, ListNODE holds a list of subtrees (any number of children), and ListLEAF holds a list of values.
+
+The function signature is:
+
+haskell
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+It takes a combining function f, a base value, and a tree, and combines all the leaf values left to right.
+
+Think about the two cases. For ListLEAF [a], you have a list of values — what higher order function could combine a list down to a single value using f and base?
+
+not merge, not foldl since that's just being called on a function repeatedly. Map returns a list.
+
+5:45 PM
+You're actually closer than you think — foldl is the right idea for the leaf case!
+
+For ListLEAF [a], you have a list like [1,2,3] and you want to combine them all with f starting from base. That's exactly what foldl f base list does.
+
+So the leaf case would be:
+
+haskell
+foldListTree f base (ListLEAF xs) = foldl f base xs
+Now the trickier part — ListNODE [(ListTree a)]. You have a list of subtrees. You need to:
+
+Recursively apply foldListTree to each subtree
+Combine those results together
+For step 1, what function applies something to every element in a list?
+
+what is f base? Am I supposed to know
+
+5:46 PM
+Yes! f and base are just the parameters being passed into foldListTree. Think of them like this:
+
+f is the combining function (like + or max)
+base is the starting value (like 0 or "")
+So when someone calls foldListTree (+) 0 t4, the f is (+) and the base is 0.
+
+For the leaf case, foldListTree f base (ListLEAF [1,2,3]) with f = (+) and base = 0 would do foldl (+) 0 [1,2,3] = 6. Does that click?
+
+Ah I see it in the directions but you can probably explain it better to me. Ok so "where f is the combining function of type a -> a -> a." 
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+
+base is a, and t is ListTree a for calling the function and it returns a.
+
+These are all the same values so they must be ListTree data types.
+
+5:50 PM
+Close, but let me clarify! They're not all ListTree types. In the signature:
+
+haskell
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+(a -> a -> a) — f is a function taking two a values and returning an a
+a — base is just a plain value (like 0 or "")
+ListTree a — the tree
+a — the return value, also a plain value
+So if the tree holds Integers, then a is Integer everywhere. base would be something like 0, f would be something like (+), and you get back an Integer.
+
+The a in ListTree a and the a everywhere else are the same type — they all have to match. So you can't call foldListTree (+) 0 on a ListTree String because 0 is not a String.
+
+Does that clear it up? Now back to the node case — you have a list of subtrees and you want to apply foldListTree f base to each one. What function applies something to every element in a list?
+
+Ok so I misspoke. They are all the same types of data in the data type ListTree
+
+5:51 PM
+Right! So a just means whatever type the tree is holding — if it's a ListTree Integer, then a is Integer everywhere in the signature.
+
+Anyway, back to the node case! You have:
+
+haskell
+foldListTree f base (ListNODE subtrees) = ??
+Where subtrees is a list of ListTree a values. You need to apply foldListTree f base to each subtree to get a result from each one — what function does something to every element in a list and gives you back a list?
+
+map
+
+5:52 PM
+Yes! So map (foldListTree f base) subtrees gives you a list of results, one per subtree.
+
+But then you need to combine that list of results down to a single value. You have a combining function f and a base... what does that sound like?
+
+didnt we already figure out this was foldl?
+
+5:52 PM
+Yes! So putting it together:
+
+haskell
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)
+Map applies foldListTree f base to each subtree giving you a list of results, then foldl f base combines that list into one value.
+
+Can you put both cases together into the full function?
+
+Probably not
+
+5:53 PM
+You've literally just said both cases out loud! Try filling in the blanks:
+
+haskell
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+foldListTree f base (ListLEAF xs) = ??
+foldListTree f base (ListNODE subtrees) = ??
+The leaf case we figured out a few messages ago, and the node case you just agreed to. Just type them out!
+
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+foldListTree f base (ListLEAF xs) = foldl f base xs
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)
+
+5:54 PM
+That's it! You got it. Now for problem 6 you just need to define two example trees:
+
+A Tree Integer with at least 3 levels
+A ListTree a with at least 3 levels
+They just need to be different from the examples in the assignment. Something like:
+
+haskell
+myTree :: Tree Integer
+myTree = NODE 0 
+    (NODE 0 (LEAF 1) (LEAF 2)) 
+    (NODE 0 (LEAF 3) (NODE 0 (LEAF 4) (LEAF 5)))
+Can you try writing a ListTree? Just make sure it has ListNODE containing other ListNODEs or ListLEAFs, at least 3 levels deep.
+
+Hold on I'm still stuck on #5. Let's talk about it a bit more before moving on to #6.
+
+5:54 PM
+Of course! What's confusing you about it?
+
+All of it. XD
+
+5:56 PM
+Ha, fair enough! Let's break it down super simply.
+
+Forget the code for a second. Imagine you have this tree:
+
+ListNODE
+  ├── ListLEAF [1, 2, 3]
+  └── ListLEAF [4, 5]
+If you call foldListTree (+) 0 on it, you want to get 15 (all the leaf values added together).
+
+The leaves just have lists in them. [1,2,3] and [4,5]. The goal is to combine ALL those values into one number using + starting from 0.
+
+So mentally, what would you do step by step? First you'd need to handle each leaf, then combine the results. What does foldl (+) 0 [1,2,3] give you?
+
+So I'm still just adding and summing leafs? I'm just using foldl
+
+5:57 PM
+Yes exactly! foldListTree is a generalized fold — it works for any combining function, not just +. But the mechanics are the same idea.
+
+For the leaf case, you literally just fold the list inside the leaf:
+
+haskell
+foldListTree f base (ListLEAF xs) = foldl f base xs
+So foldListTree (+) 0 (ListLEAF [1,2,3]) = foldl (+) 0 [1,2,3] = 6.
+
+The node case is what makes it recursive. When you hit a ListNODE you have a list of subtrees. You can't fold directly over subtrees — you first need to get a result from each subtree. That's the map step. Then you fold those results together.
+
+So foldListTree (+) 0 (ListNODE [ListLEAF [1,2,3], ListLEAF [4,5]]) would:
+
+Map over the subtrees: [foldListTree (+) 0 (ListLEAF [1,2,3]), foldListTree (+) 0 (ListLEAF [4,5])] = [6, 9]
+Fold that result list: foldl (+) 0 [6, 9] = 15
+Does seeing it traced through like that help?
+
+ok ListTree can only be a list of leafs or a list of ListTree. So the function takes in a function of value as, a value of a, a ListTree of a (so a list of as), and returns a value of a.
+
+So what is "base"
+
+6:01 PM
+base is the starting value for the fold — it's the "what do I return if there's nothing to combine?" value.
+
+Think about it this way. What should foldListTree (+) 0 (ListNODE []) return if the node has no subtrees? There's nothing to add, so you return 0. That's base!
+
+Or foldListTree (++) "" (ListLEAF []) — empty leaf list, nothing to combine, return "". That's base again.
+
+It's the same concept as foldl f base list — if the list is empty, you just return base. Does that help?
+
+Let's focus on the base case:
+
+foldListTree f base (ListLEAF xs) = foldl f base xs
+I'm cofnused about base here and f. I get that the ListLeaf xs is a list of leafs, and we call foldl which will repeatedly call foldl on the rest of the list.
+
+6:02 PM
+Ok so f and base are just the parameters that got passed into foldListTree. They're not special — they're just being passed straight through to foldl.
+
+So if someone called foldListTree (+) 0 (ListLEAF [1,2,3]):
+
+f is (+)
+base is 0
+xs is [1,2,3]
+And then the leaf case just does foldl (+) 0 [1,2,3] = 6.
+
+The leaf case is literally just "I have a list, fold it with whatever function and base value I was given." Does that click?
+
+No because we aren't calling (+) or 0. We are just leaving it as f base. Is f just (+) by default? and base is 0 by default so if we don't specify it just becomes that?
+
+6:03 PM
+No, there's no default! f and base are whatever the caller passes in. They're just variables, like x or n.
+
+When you write:
+
+haskell
+foldListTree f base (ListLEAF xs) = foldl f base xs
+You're saying "whatever f and base I received as arguments, pass them along to foldl."
+
+So it's like a relay race — foldListTree receives f and base from whoever called it, and hands them off to foldl. It doesn't know or care what they are.
+
+If someone calls foldListTree (+) 0 ... then f = (+) and base = 0. If someone calls foldListTree (max) (-999) ... then f = (max) and base = (-999).
+
+The function works for any f and base — that's what makes it general purpose! Does that help?
+
+OH OH OH WE are just making a function that folds. We aent specifying it. The person who calls the function will specify?
+
+6:04 PM
+YES! That's exactly it! 🎉
+
+foldListTree is just a general purpose folding machine. You're building the machine, not deciding what it does. The person who calls it decides that by passing in f and base.
+
+That's the whole beauty of higher order functions in Haskell — you write one flexible function that works for addition, string concatenation, max, whatever. The caller decides!
+
+So your code is correct:
+
+haskell
+foldListTree f base (ListLEAF xs) = foldl f base xs
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)
+You built the machine. Someone else loads it with (+) and 0, or (++) and "", and it just works. Does the whole thing make sense now?
+
+Let me look at it a little longer before I decide.
+
+6:04 PM
+Take your time!
+
+so what is a base value again? I understand the binary function is f
+
+6:05 PM
+base is the starting value for the fold — it's what you return if there's nothing to combine, and it's what you start accumulating from.
+
+Think of foldl (+) 0 [1,2,3]:
+
+Start with 0
+Add 1 → 1
+Add 2 → 3
+Add 3 → 6
+That 0 is the base. It's the "starting point."
+
+For foldl (++) "" ["hello", "world"]:
+
+Start with ""
+Append "hello" → "hello"
+Append "world" → "helloworld"
+That "" is the base.
+
+So base is just "what do I start with, and what do I return if the list is empty?" Does that help?
+
+ok so it sets whether it's an int, char, etc.
+
+6:06 PM
+Sort of, but not exactly! The type is determined by the tree itself and the function f. base just needs to match that type.
+
+So if you're folding a ListTree Integer with (+), then base must be an Integer like 0. If you're folding a ListTree String with (++), then base must be a String like "".
+
+Think of it less as "setting the type" and more as "base has to be the same type as whatever the tree holds and whatever f returns." Haskell enforces that automatically — if you tried foldListTree (+) "" someIntTree it would give you a type error.
+
+Does that make sense?
+
+is the subtree list from map create a list of leafs?
+
+6:07 PM
+Not exactly! map (foldListTree f base) subtrees gives you a list of results (plain a values like integers or strings), not a list of leaves.
+
+So if subtrees is [ListLEAF [1,2,3], ListLEAF [4,5]], then after the map you get [6, 9] — just plain numbers. The tree structure is gone at that point.
+
+Then foldl f base takes that plain list [6, 9] and combines it into one final value.
+
+Does that help?
+
+help me with the comments. My brain hurts:
+"
+
+                  deriving (Show, Read, Eq)
+
+-- Takes a binary function, a base value, and a ListTree.
+-- It folds the ListTree using the binary function and base value, returning a single value.
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+-- Base case: we are at a leaf, so we fold the list of values in the leaf using the binary function (+/-/etc.) and base value.
+foldListTree f base (ListLEAF xs) = foldl f base xs
+-- Otherwise, we are at a node, so we fold the list of subtrees into a mapped list of values using the binary function and base value.
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)"
+Show more
+6:09 PM
+The comments are pretty good! I'd just tweak the node case comment to be clearer about what's actually happening in two steps:
+
+haskell
+data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
+                  deriving (Show, Read, Eq)
+
+-- Takes a binary function, a base value, and a ListTree.
+-- Folds all the leaf values in the tree left to right using the binary function and base value.
+foldListTree :: (a -> a -> a) -> a -> ListTree a -> a
+-- Base case: fold the list of values in the leaf using the binary function and base value.
+foldListTree f base (ListLEAF xs) = foldl f base xs
+-- Recursive case: map foldListTree over each subtree to get a list of results,
+-- then fold that results list into a single value using the binary function and base value.
+foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base) subtrees)
+The key change is the node comment now mentions the two steps — map first to get results, then fold those results. Ready for problem 6?
+
+Ok how long is #6 gonna take? It's only worth 4% of the assignment
+
+6:13 PM
+Honestly, #6 shouldn't take long at all! You just need to:
+
+Define a Tree Integer with at least 3 levels
+Define a ListTree with at least 3 levels
+The trees themselves are just a few lines each. The bulk of the work is writing the test cases for them, but you need those for sumTree, createSumTree, and foldListTree anyway.
+
+I'd say 10-15 minutes tops. Want to just go for it?
+
+Yeah I don't think I'll need this for the exam
+
+6:13 PM
+Fair enough, you probably won't! Trees are more of a data structures topic than a Haskell syntax/concepts topic.
+
+For #6 you just need to define the trees and they'll double as your extra test cases. Try writing a Tree Integer — just nest some NODEs and LEAFs at least 3 levels deep. Something like:
+
+haskell
+myTree :: Tree Integer
+myTree = NODE 0
+    (NODE 0 (LEAF 1) (LEAF 2))
+    (NODE 0 (LEAF 3) (NODE 0 (LEAF 4) (LEAF 5)))
+That's 3 levels. Can you try writing a ListTree?
+
+just give me the solution
+
+6:13 PM
+You've got an exam tomorrow and 4% isn't worth stressing over. Here you go:
+
+haskell
+-- Tree Integer example (3+ levels)
+myTree :: Tree Integer
+myTree = NODE 0
+    (NODE 0 (LEAF 2) (NODE 0 (LEAF 3) (LEAF 4)))
+    (NODE 0 (LEAF 5) (LEAF 6))
+
+-- ListTree example (3+ levels)
+myListTree :: ListTree Integer
+myListTree = ListNODE 
+    [ ListNODE [ ListLEAF [1,2,3], ListLEAF [4,5] ],
+      ListNODE [ ListLEAF [6,7], ListNODE [ListLEAF [8,9], ListLEAF [10]] ],
+      ListLEAF [11,12] ]
+Go study for your exam! You can worry about the test cases after. Good luck tomorrow!
+
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Claude
