@@ -1,0 +1,123 @@
+pdfHW2.hshs-- CptS 355 - Spring 2026 Assignment 2
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched pastedpdfHW2SampleTests.hshsHW2.hshsOk so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that.
+Ok, so lepastedpdfHW2.hshsOk so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that. #1 is done, let's move onto #pastedOk so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that. #1 is done, let's move onto #3. I'll paste my #1 & 2 here. I'd like to be walked through a bit so I'm not just being given the answer, I'll give you the first 2 conversation for examples4:53 PMGood luck on the exam tomorrow! Let's dig into problem 3.
+You've got this data type already defined:
+haskelldata LengthUnit = INCH Int | FOOT Int | YARD Int
+    deriving (Show, Read, Eq)
+So addLengths takes two LengthUnit values and returns their sum as INCH. The conversions are 1 foot = 12 inches, 1 yard = 36 inches.
+First question: how do you think you'd extract the number out of something like FOOT 2 or INCH 5? Think about what pattern matching on a custom data type looks like — you've done it with lists, but now the "constructors" are INCH, FOOT, and YARD instead of [] and (:).
+What would a helper function look like that converts any LengthUnit to its value in inches?OH right we're making our own data type here aren't we?4:55 PMExactly! The data keyword is how Haskell lets you define your own custom types. LengthUnit is a type with three possible "shapes" — INCH Int, FOOT Int, or YARD Int. Each one wraps an Int value.
+The cool thing is you can pattern match on them just like you do with lists. So if someone passes in FOOT 2, you can destructure it to get the 2 out.
+Try writing a helper function that converts any LengthUnit to its equivalent number of inches as a plain Int. Something like:
+haskelltoInches :: LengthUnit -> Int
+toInches (INCH n) = ??
+toInches (FOOT n) = ??
+toInches (YARD n) = ??
+What should each case return?foot n would be 12 and yard is 36?4:56 PMClose! But you need to multiply by n, not just return the conversion factor. FOOT 2 should give you 24 inches (2 × 12), not just 12.
+So:
+haskelltoInches :: LengthUnit -> Int
+toInches (INCH n) = ??
+toInches (FOOT n) = n * 12
+toInches (YARD n) = n * 36
+Can you fill in the INCH case?n * 1?4:56 PMYou could, but simpler to just write n! Since 1 inch is just 1 inch, multiplying by 1 is redundant.
+haskelltoInches (INCH n) = n
+Now with toInches as a helper, can you write addLengths? It takes two LengthUnit values, converts both to inches, adds them, and wraps the result in INCH.
+haskelladdLengths :: LengthUnit -> LengthUnit -> LengthUnit
+addLengths l1 l2 = INCH (?? + ??)
+What goes in the two ?? spots?aren't you just adding l1  + l2?4:56 PMAlmost! But l1 and l2 are LengthUnit values, not plain numbers — Haskell won't know how to add them directly with +. You need to convert them to Int first using your toInches helper.
+So what would it look like using toInches on both?toInches(l1) + toInches (l2)?4:57 PMYes! Just note that Haskell function calls don't need parentheses like that — it's just toInches l1, not toInches(l1). So the full function is:
+haskelladdLengths :: LengthUnit -> LengthUnit -> LengthUnit
+addLengths l1 l2 = INCH (toInches l1 + toInches l2)
+Try that out mentally — addLengths (FOOT 2) (INCH 5) should give INCH 29. Does that check out?yeah that checks out4:58 PMNow for addAllLengths! It takes a nested list of LengthUnit values and returns the total as INCH. No explicit recursion — you need map and foldl/foldr.
+The hint says the base for the fold needs to be a LengthUnit value. So your starting accumulator can't be 0, it needs to be INCH 0.
+Think about it in steps like countInRange:
+
+You have a nested list like [[YARD 2, FOOT 1], [YARD 1, FOOT 2, INCH 10]]
+You need to flatten/combine each sublist somehow
+Then combine everything together
+
+What higher order function might help you combine each sublist down to a single LengthUnit?hold on let's back up a second because I'm a bit... I just can't remember. LengthUnit is the data type. what is the INCH, FOOT, and YARD?4:59 PMGreat question! INCH, FOOT, and YARD are called constructors — they're basically the different "shapes" that a LengthUnit value can take. Think of them like tags that wrap an Int value.
+So INCH 5 means "a LengthUnit that is 5 inches", FOOT 2 means "a LengthUnit that is 2 feet", etc.
+It's similar to how a list can either be [] or (x:xs) — those are the two constructors for lists. Here you just have three constructors instead of two, and you defined them yourself with the data keyword.
+Does that click?Ok now let's move on5:00 PMSo addAllLengths takes a nested list like [[YARD 2, FOOT 1], [YARD 1, FOOT 2, INCH 10]] and returns the total as a single INCH.
+Think about it in two steps:
+
+Combine each sublist down to a single LengthUnit
+Combine all those results into one final LengthUnit
+
+For step 1, you have a sublist like [YARD 2, FOOT 1] and want to add them all together. You have addLengths that adds two LengthUnit values... and a fold that repeatedly applies a function across a list starting from some base value.
+What do you think step 1 looks like?hmmm....foldl is function, starting value, and a list.So addlengths, 0, list of lists?5:02 PMReally close! The function and list parts are right. But remember the base value can't be 0 — it needs to be a LengthUnit value. What LengthUnit would make sense as a "zero" starting point?n? No5:03 PMThink about it this way — what would adding zero inches to something look like as a LengthUnit?I sincerely don't know.5:06 PMWhat if you had INCH 0? Zero inches — adding that to anything wouldn't change the value, just like starting a sum with 0!
+So step 1 would be:
+haskellfoldl addLengths (INCH 0) sublist
+That folds over a single sublist and combines everything into one INCH value. Does that make sense?Oh so it is zero, it's just specifically INCH 05:06 PMExactly! You still need zero as the starting value, it just has to be wrapped in a LengthUnit constructor so the types match. INCH 0 is your "identity" value — adding it changes nothing.
+So now for addAllLengths, you have a nested list. Step 1 folds over each sublist. What higher order function would you use to apply that fold to every sublist in the outer list?addLengths?5:07 PMClose, but addLengths is for combining two LengthUnit values. What you need here is a function that applies something to every element in a list and gives you back a new list. You used it in problem 2!not filter5:07 PMThat's right, not filter! The one that applies a function to every element and gives you back a new list — you used it a lot in problem 2?oh derp map5:08 PMYes! So putting it together:
+Step 1: map (foldl addLengths (INCH 0)) iL — applies the fold to every sublist, giving you a flat list of LengthUnit values.
+Step 2: You need to combine that flat list down to one final LengthUnit. What would you use for that?foldl?5:09 PMYes! So can you put both steps together?
+haskelladdAllLengths :: [[LengthUnit]] -> LengthUnit
+addAllLengths iL = foldl addLengths (INCH 0) (map ?? iL)
+What goes in the ?? spot?I want to get this so bad. XD map? XD5:11 PM2 / 2You're so close! Think about what function you want to apply to each sublist. You want to fold each sublist down to a single LengthUnit. You literally just wrote that expression a few messages ago!just give it to me. I don't have time to waste. It's 5 pm already and I'm taking too long to understand sadly.5:11 PMfoldl addLengths (INCH 0) — that's the function you're mapping over each sublist!
+haskelladdAllLengths :: [[LengthUnit]] -> LengthUnit
+addAllLengths iL = foldl addLengths (INCH 0) (map (foldl addLengths (INCH 0)) iL)
+Ready for problem 4?Ah composition. So the innermost is returning a LengthUnit where it's using foldl to go through all the lists in iL, then mapping the result of ech of the sublists to a list?5:14 PMAlmost! Let me clarify the two steps:
+
+map (foldl addLengths (INCH 0)) iL — goes through each sublist and folds it down to a single LengthUnit, giving you a flat list like [INCH 84, INCH 118, INCH 108]
+Then the outer foldl addLengths (INCH 0) takes that flat list and combines everything into one final INCH value.
+
+So it's not really composition, it's more like the same pattern you used in countInRange — map first, then fold the results. Does that feel clearer?ah yeah that's not composition. it's just a long higher order function argument. I was tracing it correctly.5:15 PMExactly right! You're tracing it correctly — it's just a nested higher order function call. Map produces a flat list, then the outer fold collapses that flat list into one value. Same pattern as countInRange, just with LengthUnit instead of Int.
+Ready for problem 4? Trees!-- CptS 355 - Spring 2026 Assignment 2
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched pastedOk so this is what i have so far5:19 PMCode looks great! On to problem 4 — trees!
+You have this data type:
+haskelldata Tree a = LEAF a | NODE a (Tree a) (Tree a)
+So a tree is either a LEAF with a single value, or a NODE with a value and two subtrees.
+For sumTree, you want to sum only the leaf values, ignoring the values stored in nodes.
+Think about pattern matching on the two constructors. What should happen when you hit a LEAF? And what should happen when you hit a NODE?I guess I'm confused. You mean what should happen in sumTree? Nodes are ignored, leafs get added5:22 PMExactly right! So can you write the two pattern matching cases?
+haskellsumTree :: Num p => Tree p -> p
+sumTree (LEAF a) = ??
+sumTree (NODE a left right) = ??
+For the LEAF case, what do you return? And for the NODE case, you need to recurse on both subtrees — ignoring a entirely.wouldn't you call sumTree on NODE left and NODE right?5:23 PMYes exactly! But just left and right, not NODE left and NODE right — they're already subtrees. So:
+haskellsumTree (NODE a left right) = sumTree left + sumTree right
+Can you write the LEAF case?Uhhh doesn't it sum something5:23 PMYes! A LEAF just holds a single value a, and that's what you want to sum. So you just return it directly:
+haskellsumTree (LEAF a) = a
+The recursion handles the adding — when you call sumTree left + sumTree right on a node, it keeps recursing down until it hits leaves, then adds them all up on the way back. Does that make sense?ok so let's put it together5:23 PMhaskellsumTree :: Num p => Tree p -> p
+sumTree (LEAF a) = a
+sumTree (NODE a left right) = sumTree left + sumTree right
+That's it! Short and clean. Ready for createSumTree? It's a bit trickier — instead of just summing, you need to return a whole new tree where each node stores the sum of the leaves beneath it.-- Takes a Tree of Nums and returns the sum of all the values in the tree.Is that an accurate description?5:25 PMAlmost! It's actually only the leaf values, not all values. The node values get ignored. So more accurate would be:
+haskell-- Takes a Tree of Nums and returns the sum of the leaf values in the tree.
+Ready for createSumTree?well the node values are just broken down into leaf values, yes?5:25 PMSort of! But technically the node values are completely independent — they're just stored there and don't contribute to anything in sumTree. It's just a coincidence that in the assignment examples the node values happen to be things like 0 or 1. You could have NODE 999 (LEAF 1) (LEAF 2) and sumTree would still return 3, ignoring the 999 entirely.
+So the node values aren't "broken down" into leaves — they're just ignored!Ok let's move on5:26 PMcreateSumTree! So instead of just returning a number, you're returning a whole new tree where each node's value is replaced with the sum of the leaves beneath it. Leaves stay the same.
+So pattern matching on the two cases again:
+haskellcreateSumTree :: Num a => Tree a -> Tree a
+createSumTree (LEAF a) = ??
+createSumTree (NODE a left right) = ??
+The LEAF case is easy — what do you return for a leaf?a5:26 PMYes! Leaves stay exactly the same. Now the NODE case is trickier. You need to:
+
+Recursively call createSumTree on both subtrees
+Build a new NODE where the value is the sum of leaves beneath it
+
+You already have a function that calculates the sum of leaves in a tree... what is it?well createSumTree Left and createSumTree Right but you'd want to call sumTree5:27 PMExactly right! So you'd call createSumTree on both subtrees to get the new subtrees, and sumTree to calculate the new node value. Can you put that together?
+haskellcreateSumTree (NODE a left right) = NODE ?? ?? ??
+What are the three things that go inside the new NODE?a value, and then left and right subtree.  the constructor shows it as a (tree a) and (tree b)5:28 PMYes! So the three parts of the new NODE are:
+
+The new value — sumTree left + sumTree right
+The new left subtree — createSumTree left
+The new right subtree — createSumTree right
+
+Can you put that together into one line?createSumTree (NODE a left right) = NODE (sumTree)(sumTree Left) (sumTree Right)
+I feel like creed from the office over here. Qua-qual-QUABITY ASSUANCE. No, that's not it... but I'm close.5:31 PMHaha close! A couple of things:
+
+You need createSumTree left and createSumTree right for the subtrees, not sumTree
+The node value should be sumTree left + sumTree right
+
+So:
+haskellcreateSumTree (NODE a left right) = NODE (sumTree left + sumTree right) (createSumTree left) (createSumTree right)
+sumTree calculates the new value, createSumTree rebuilds the subtrees!createSumTree :: Num a => Tree a -> Tree a
+createSumTree (LEAF a) = LEAF a
+createSumTree (NODE a left right) = NODE (sumTree left + sumTree right) (createSumTree left) (createSumTree right)5:33 PMThat's it! Clean and correct. Ready for problem 5 — foldListTree? This one's a bit different because nodes can have any number of children instead of just two.This is a terrible summary:Takes a Tree of Nums and returns a new Tree where each NODE's value is the sum of all the leaf values in its subtree.5:34 PMActually that's a pretty accurate summary! What would you change about it?it sounds so AI and technical5:34 PMHaha fair enough! How about something like:
+haskell-- Rebuilds the tree with each node storing the sum of its leaf values below it.
+More natural, less robot?-- Use sumTree to calculate the sum of the leaf values below the current node and store that in the node.
+
+huh? xD5:37 PMHaha I like it! It's specific and explains the "why" behind the code. Maybe just tweak it slightly:
+haskell-- Rebuilds the tree, using sumTree to calculate and store the sum of leaf values in each node.
+Ready for problem 5?

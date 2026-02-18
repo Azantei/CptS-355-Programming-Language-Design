@@ -96,18 +96,55 @@ countInRange v1 v2 iL = foldl (+) 0 (map length (map (getInRange v1 v2) iL))
 data LengthUnit =  INCH  Int | FOOT  Int | YARD  Int
                    deriving (Show, Read, Eq)
 -- addLengths
+-- Adds two LengthUnit values together and returns the result as an INCH constructor.
+
+-- Function to convert each constructor to inches
+toInches :: LengthUnit -> Int
+toInches (INCH n) = n
+toInches (FOOT n) = n * 12
+toInches (YARD n) = n * 36
+
+addLengths :: LengthUnit -> LengthUnit -> LengthUnit
+-- Use conversion to add the two lengths together.
+-- Return the result as an INCH constructor
+addLengths l1 l2 = INCH (toInches l1 + toInches l2)
+
+-----------------------------------------------------------------
 
 -- addAllLengths
+-- Takes a nested list of LengthUnit values and returns the total length as an INCH constructor.
+
+addAllLengths :: [[LengthUnit]] -> LengthUnit
+-- Inner parenthesis: foldl repeatedly adds the lengths of sublists together.
+-- Map puts results of sublists into a list.
+-- foldl is called again to add those results for a single value.
+addAllLengths iL = foldl addLengths (INCH 0) (map (foldl addLengths (INCH 0)) iL)
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
 
 {-4 - sumTree and createSumTree - 22%-}
 
 data Tree a = LEAF a | NODE a  (Tree a)  (Tree a)
               deriving (Show, Read, Eq)
 
---sumTree
+-- sumTree
+-- Takes a Tree of Nums and returns the sum of all the leaf values in the tree.
+sumTree :: Num p => Tree p -> p
+sumTree (LEAF a) = a
+sumTree (NODE a left right) = sumTree left + sumTree right
 
+-----------------------------------------------------------------
 
 --createSumTree
+-- Rebuilds the tree with each node storing the sum of its leaf values below it.
+createSumTree :: Num a => Tree a -> Tree a
+-- Base case: Leaf
+createSumTree (LEAF a) = LEAF a 
+-- Building subtrees:
+-- Node a (Tree a) (Tree b)
+-- Rebuilds the tree, using sumTree to calculate and store the sum of leaf values in each node.
+createSumTree (NODE a left right) = NODE (sumTree left + sumTree right) (createSumTree left) (createSumTree right)
 
 
 {-5 - foldListTree - 20%-}
@@ -115,5 +152,7 @@ data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
                   deriving (Show, Read, Eq)
 
 
+-----------------------------------------------------------------
+-----------------------------------------------------------------
 
 {- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -}
