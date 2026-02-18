@@ -1,0 +1,493 @@
+pdfHW2SampleTests.hshsHW2.hshsOk so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that.
+Ok, so let's start with #1 and try to walk through it together. It sounds like we're using recursion only as usual1:11 PMLet's work through Problem 1 together! Let me first look at your starter files to see what's already there.Looking at the starter HW2.hs fileLooking at the starter HW2.hs fileDoneGood, clean slate. Let's think through merge2 together.
+The idea is: you have two sorted lists and want to merge them into one sorted list. Think about the cases you need to handle:
+
+Both lists are empty → return []
+One list is empty → return the other list
+Both have elements → compare the heads, take the smaller one first, then recurse
+
+So if l1 = (x:xs) and l2 = (y:ys):
+
+if x <= y, the result is x followed by merge2 xs l2
+if x > y, the result is y followed by merge2 l1 ys
+
+Does that logic make sense to you? Can you take a stab at writing the pattern matching for those cases? The type signature is:
+haskellmerge2 :: Ord a => [a] -> [a] -> [a]{- 
+CptS 355 - Spring 2026 Assignment 1
+Please include your name and the names of the students with whom you discussed any of the problems in this homework
+Name: Camille Orego
+GitHub Repo: https://github.com/Azantei/CptS-355-Programming-Language-Design
+Helpers: Claude Sonnet 4.5 
+        (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design/tree/main/Haskell/Assignment-1/Logs)
+-}
+
+module HW1
+     where
+
+import Data.Char (toUpper)
+
+-- 1. exists
+{-
+Type class Eq. Takes a “value” and a “list” as input. Returns boolean. 
+If the value is a member of the list, the function returns True. 
+Otherwise returns False.
+-}
+exists :: Eq t => t -> [t] -> Bool
+exists value [] = False
+exists value (x:xs)
+     | value == x = True
+     | otherwise = exists value xs
+{-
+b) We need the Eq type class because we are comparing values to members of the same type.
+This tells the compiler we will be using equality operations on the type t.
+-}
+
+
+-- 2. listUnion
+{-
+Takes two lists as input and returns the union of those lists minus duplicate values.
+Order does not matter.
+-}
+listUnion :: Eq a => [a] -> [a] -> [a]
+listUnion xs ys = 
+    let removeDups [] = []
+        removeDups (z:zs) = if exists z zs
+                            then removeDups zs
+                            else z : removeDups zs
+    in
+       case (xs, ys) of
+           ([], []) -> []
+           ([], _) -> removeDups ys
+           (_, []) -> removeDups xs     
+           ((x:xs'), (y:ys')) -> if exists x xs' || exists x (y:ys')
+                                 then listUnion xs' (y:ys')
+                                 else x : listUnion xs' (y:ys')
+
+
+-- 3. replace
+{-
+Takes an index n, a value v, and a list L and returns a (new) list which is the same as L, 
+  except that its nth element is v. 
+Assume 0-based indexing for n and n≥0. (Note that n can be greater than the length of the 
+  list L. ) 
+-}
+replace :: (Eq t1, Num t1) => t1 -> t2 -> [t2] -> [t2]
+replace n v [] = []
+replace 0 v (x:xs) = v : xs
+replace n val (x:xs) = x : replace (n-1) val xs
+
+
+-- 4. prereqFor
+{-
+Takes a list of courses (tuples of course name and prerequisite list) and a target course.
+Returns a list of course names that require the target course as a prerequisite.
+-}
+prereqFor :: Eq t => [(a, [t])] -> t -> [a]
+prereqFor [] _ = []
+prereqFor ((courseName, prereqList) : tail) targetCourse
+    | exists targetCourse prereqList = courseName : prereqFor tail targetCourse
+    | otherwise = prereqFor tail targetCourse
+
+
+-- 5. isPalindrome
+{-
+Takes a string and returns True if it's a palindrome (ignoring spaces and case),
+False otherwise.
+-}
+isPalindrome :: [Char] -> Bool
+isPalindrome str = 
+    let removeSpaces [] = []
+        removeSpaces (x:xs) 
+            | x == ' ' = removeSpaces xs
+            | otherwise = x : removeSpaces xs
+        
+        toUppercase [] = []
+        toUppercase (x:xs) = toUpper x : toUppercase xs
+        
+        cleanStr = toUppercase (removeSpaces str)
+    in cleanStr == reverse cleanStr
+
+
+-- 6. groupSumtoN
+{-
+Takes an integer N and a list of integers L.
+Groups consecutive elements into sublists where each sublist's sum is <= N.
+If an element is greater than N, it gets its own sublist.
+-}
+groupSumtoN :: (Ord a, Num a) => a -> [a] -> [[a]]
+groupSumtoN n [] = [[]]
+groupSumtoN n list = 
+    let helper [] [] _ = []
+        helper [] currentGroup _ = [currentGroup]
+        
+        helper (x:xs) currentGroup currentSum
+            | x > n && null currentGroup = [x] : helper xs [] 0
+            | x > n = currentGroup : [x] : helper xs [] 0
+            | currentSum + x <= n = helper xs (currentGroup ++ [x]) (currentSum + x)
+            -- FIX: Start fresh with x if currentGroup is empty
+            -- Prevent empty list creation
+            | null currentGroup = helper (x:xs) [x] x
+            | otherwise = currentGroup : helper (x:xs) [] 0
+    
+    in helper list [] 0
+-- End of HW1.hsThis is my assignment from last week and I'm noticing a similarity with one of the methods hereShow more1:29 PMGood eye! Your exists function from HW1 is very similar in structure to what merge2 needs — both use pattern matching on lists with a base case for empty lists and recursive cases comparing elements.
+The key difference is instead of checking membership, you're deciding which element to take first based on comparison.
+Looking at your HW1 style, here's the skeleton to fill in:
+haskellmerge2 :: Ord a => [a] -> [a] -> [a]
+merge2 [] l2 = ??
+merge2 l1 [] = ??
+merge2 (x:xs) (y:ys)
+    | x <= y    = ??
+    | otherwise = ??
+The base cases are easy — what should happen when one list is empty? And for the recursive cases, if x <= y, you know x comes first... then what do you recurse on?
+Take a shot at filling those in!merge2 [] l2 = l2
+merge2 l1 [] = l11:30 PMPerfect, those are exactly right! Now the recursive cases — give those a shot:
+haskellmerge2 (x:xs) (y:ys)
+    | x <= y    = ??
+    | otherwise = ??
+Think about it this way: if x <= y, you want x at the front of the result. But what are the two remaining lists you still need to merge after taking x?I'm not entirely certain to be honest. Like are you asking about keeping x at the head?1:33 PMYes exactly! So when x <= y, you want x at the front. After placing x, you've "used it up" from the first list, so you need to merge xs (the rest of l1) with (y:ys) (all of l2, since you haven't used any of it yet).
+So it looks like:
+haskell| x <= y    = x : merge2 xs (y:ys)
+Can you work out the otherwise case using the same logic?then that means y < x so you want y at the head so y: merg2 ys (x:xs)?1:34 PMExactly right! So putting it all together:
+haskellmerge2 :: Ord a => [a] -> [a] -> [a]
+merge2 [] l2 = l2
+merge2 l1 [] = l1
+merge2 (x:xs) (y:ys)
+    | x <= y    = x : merge2 xs (y:ys)
+    | otherwise = y : merge2 (x:xs) ys
+That's the complete function! You worked it out yourself really well. Want to move on to merge2Tail? It's the same logic but tail recursive, which is a bit trickier. The hint in the assignment mentions using revAppend — do you remember how that works?So instead of pulling heads off, we are working on tails now. I don't remember revAppend1:37 PMNo worries! revAppend basically takes a reversed list and appends it to another list. It was defined in class as:
+haskellrevAppend [] ys = ys
+revAppend (x:xs) ys = revAppend xs (x:ys)
+So revAppend [3,2,1] [4,5] gives [1,2,3,4,5] — it reverses the first list onto the front of the second.
+The reason we need it for merge2Tail is because tail recursive functions build up an accumulator in reverse order as they go. So when you hit a base case, instead of just returning the remaining list, you use revAppend acc remainingList to flip the accumulator back to the right order and attach it.
+The signature looks like:
+haskellmerge2Tail :: Ord a => [a] -> [a] -> [a]
+merge2Tail l1 l2 = go l1 l2 []
+    where
+        go [] l2 acc = ??
+        go l1 [] acc = ??
+        go (x:xs) (y:ys) acc
+            | x <= y    = ??
+            | otherwise = ??
+The go helper carries the accumulator. For the recursive cases, instead of putting x at the front with :, you add it to the accumulator. What do you think that looks like?Wait can we back up a bit? Don't we have to remove the duplicates from the list in merge2?1:38 PMActually no — look at the assignment description again. It says:
+
+"The resulting list should include the elements from both lists and may include duplicates."
+
+And you can see it in the examples too:
+merge2 [2,5,6,8,9] [1,3,4,5,7,8,10]
+[1,2,3,4,5,5,6,7,8,8,9,10]
+The 5 and 8 appear twice because they were in both lists. So your merge2 is already correct as written — no duplicate removal needed!Oh derp ok sorry let's move forward again. So revAppend already removes dupes?1:39 PMNo worries! revAppend doesn't remove duplicates at all — it's just a utility for reversing a list onto another list. We still keep duplicates throughout.
+To clarify what it does:
+revAppend [3,2,1] [4,5,6] = [1,2,3,4,5,6]
+It just flips the first list and attaches it to the front of the second. That's it!
+So back to merge2Tail — the accumulator builds up your merged list backwards as you recurse, and then revAppend fixes the order at the end. Want to try filling in the base cases?
+haskellmerge2Tail l1 l2 = go l1 l2 []
+    where
+        go [] l2 acc = ??   -- done with l1, what do you return?
+        go l1 [] acc = ??   -- done with l2, what do you return?
+        go (x:xs) (y:ys) acc
+            | x <= y    = ??
+            | otherwise = ??
+Hint: when one list is empty, you need to attach acc (reversed) to whatever is left in the other list.why do I want to remove duplicates so bad? haha1:39 PMHaha probably because your listUnion from HW1 was all about removing duplicates, so your brain is in that mode! Different problem this time though — we're just merging, not unioning.
+So back to the base cases — when l1 is empty, you have acc built up backwards and l2 still remaining. You want to combine them with revAppend. Give it a shot!why do we want to reverse the list?1:40 PMGreat question! Think about how the accumulator builds up. Say you're merging [1,3] and [2,4]:
+
+Start: acc = []
+1 < 2, so add 1 to acc: acc = [1]
+3 > 2, so add 2 to acc: acc = [2,1]
+3 < 4, so add 3 to acc: acc = [3,2,1]
+
+You can see each new element gets prepended to acc, so it ends up backwards. That's just how accumulator-style recursion works — it's efficient because adding to the front of a list is fast in Haskell, but it means you need to reverse at the end.
+So revAppend [3,2,1] [4] gives you [1,2,3,4] — the correctly ordered result!I remember learning this in class and i Was following really well, and now look at me. HahaBut yeah it makes sense you're building the list backwards because of tail recursion, you're not starting at the head, you're starting at the furthest point in the list. ANYWAY ok so at the end we want to reverse it is all1:41 PMHaha don't be too hard on yourself — tail recursion is genuinely one of those things that clicks in class and then feels slippery when you're actually writing it. You clearly do understand it though!
+So yes, exactly — reverse at the end is all. So the base cases:
+haskellgo [] l2 acc = revAppend acc l2
+go l1 [] acc = revAppend acc l1
+Now for the recursive cases, instead of putting x at the front with :, you add it to the accumulator. So x : merge2 xs (y:ys) becomes go xs (y:ys) (x:acc).
+Can you write the two recursive cases?wait where did the go come from?1:42 PMgo is just the name of the helper function defined in the where block! It carries the accumulator acc as an extra parameter. merge2Tail itself can't be tail recursive with just two parameters, so we use a helper.
+So the structure is:
+haskellmerge2Tail :: Ord a => [a] -> [a] -> [a]
+merge2Tail l1 l2 = go l1 l2 []
+    where
+        go [] l2 acc = revAppend acc l2
+        go l1 [] acc = revAppend acc l1
+        go (x:xs) (y:ys) acc
+            | x <= y    = ??
+            | otherwise = ??
+merge2Tail just kicks things off by calling go with an empty accumulator. All the actual work happens inside go. Does that make sense?Did we establish this at some point?1:43 PMNo we didn't, sorry! I just introduced go without explaining it. That was on me.
+You have two options for the helper — I just picked one. You could name it anything really, go is just a common convention in Haskell. Alternatively you could define it with a more descriptive name in a where block:
+haskellmerge2Tail :: Ord a => [a] -> [a] -> [a]
+merge2Tail l1 l2 = merge2Helper l1 l2 []
+    where
+        merge2Helper [] l2 acc = revAppend acc l2
+        merge2Helper l1 [] acc = revAppend acc l1
+        merge2Helper (x:xs) (y:ys) acc
+            | x <= y    = ??
+            | otherwise = ??
+Same exact thing, just a clearer name. Does that feel better? Now can you fill in the two recursive cases?so the helper function is building the list in reverse order? would it make sense to build the list and then repeat it out with revAppend?1:43 PMYes, that's exactly what's happening! The helper builds the merged list in reverse into acc, and then revAppend fixes it at the end in the base cases.
+So for the recursive cases, you're just adding the smaller element to the front of acc:
+
+If x <= y, take x, add it to acc, keep going
+Otherwise take y, add it to acc, keep going
+
+haskell| x <= y    = merge2Helper xs (y:ys) (x:acc)
+| otherwise = merge2Helper (x:xs) ys (y:acc)
+Notice how similar this is to merge2 — the only difference is instead of x : merge2... you're doing merge2Helper ... (x:acc). You're just moving where the element goes!
+Does that click?No. D: It feels like it's not building the list THEN reversing it. It feels like it's reversing it every time it adds a new element1:48 PMThat's a really good observation! You're right that (x:acc) adds x to the front of acc each time, which looks like it's constantly reversing. But it's not reversing — it's just prepending.
+Think of it like a stack. Each step you're just pushing onto the top:
+acc = []
+push 3 → acc = [3]
+push 2 → acc = [2,3]
+push 1 → acc = [1,2,3]
+Nothing is being reversed mid-process. You're just stacking elements. The list happens to end up backwards because you're always adding to the front. Then at the very end, revAppend flips the whole thing once.
+So it's more like:
+
+Build the backwards list (accumulate)
+Flip it once at the end (revAppend)
+
+Does that feel clearer?Oh this is tail recursion where it's like putting things on the stack and sending the answer to the next stack so it's not really "unfurling" the whole stack. It sends the answer so when it gets to the end of the recursion, the stack doesn't need to send the calculation all the way down, it's already done the calculation by the time it gets to the end and just needs to do it that once? Am i explaining myself?1:49 PMYes! You're explaining yourself perfectly! That's exactly it.
+In regular recursion, you have to wait for the whole chain to unwind before you can calculate anything — each call is waiting on the next one to return. Like a chain of IOUs.
+In tail recursion, the answer is carried forward in the accumulator. By the time you hit the base case, the work is already done — you just return it. No unwinding needed, hence no stack buildup.
+That's why acc starts as [] and gets built up as you go — it's carrying the "answer so far" forward at every step.
+You clearly do understand this, your brain just needed a second to connect the concept to the code!
+So with that in mind, does the recursive case make more sense now?
+haskell| x <= y    = merge2Helper xs (y:ys) (x:acc)
+| otherwise = merge2Helper (x:xs) ys (y:acc)
+You're just pushing the smaller element onto the accumulator and passing it forward!how do I import revAppend? Do I need to have it in the file?1:55 PMYou need to define it in the file yourself! It's not a built-in Haskell function. Just add it at the top of your HW2.hs file:
+haskellrevAppend :: [a] -> [a] -> [a]
+revAppend [] ys = ys
+revAppend (x:xs) ys = revAppend xs (x:ys)
+Since it's used by merge2Tail but isn't specific to any one problem, it's fine to define it in the main scope of the file rather than inside a where block.Can I put it after merg2Tail or is haskell gonna be mad if the method is after?1:56 PMHaskell is actually fine with functions being defined after they're used! Unlike some languages, Haskell doesn't care about order of definitions in a file. So you can put revAppend after merge2Tail and it'll work no problem.what languages care?1:56 PMC and C++ are classic examples — you have to declare a function before you use it, which is why you often see header files (.h) full of declarations.
+Java and Python are a bit more nuanced — they're fine within a class or module but can have ordering issues in certain contexts.
+Haskell is nice in that it's fully order-independent, which makes sense given its mathematical/functional nature — it treats definitions more like equations than instructions.
+Anyway, back to the assignment! Want to write out the full merge2Tail now that we have all the pieces?I've coded in c++ and I don't remember having to define a function before you use it. Weird.1:56 PMYou might have been using an IDE or compiler that handled it for you, or you may have been working within classes where it's less of an issue. But technically in C++ if you have two separate functions and one calls the other, the called one needs to be declared first — or you use a forward declaration. It's easy not to notice though!
+Anyway, rabbit hole! Let's get back on track. Want to write out the full merge2Tail now?Hm what do blue squigglies mean on my visual studio code? It's saying lik e""Use foldl Found:   revAppend [] ys = ys revAppend (x : xs) ys = revAppend xs (x : ys) Why not:   revAppend xs ys = foldl (flip (:)) ys xs hlint(refact:Use foldl)"  "2:00 PMThat's just HLint, a Haskell style suggestion tool built into VS Code. It's saying "hey you could write this more concisely using foldl." It's not an error, just a suggestion — the blue squiggly means a style hint, not a problem.
+You can safely ignore it! Your revAppend definition is perfectly valid and honestly more readable for what we're doing. Keep it as is.So what's the base case for this?merge2Helper [] l2 acc = revAppend acc l2
+        merge2Helper l1 [] acc = revAppend acc l1?2:05 PMThose are the base cases! You wrote them already. They handle:
+
+merge2Helper [] l2 acc — l1 is empty, so reverse acc onto whatever is left in l2
+merge2Helper l1 [] acc — l2 is empty, so reverse acc onto whatever is left in l1
+
+So the full function is just those two base cases plus the two recursive cases we worked out:
+haskellmerge2Tail :: Ord a => [a] -> [a] -> [a]
+merge2Tail l1 l2 = merge2Helper l1 l2 []
+    where
+        merge2Helper [] l2 acc = revAppend acc l2
+        merge2Helper l1 [] acc = revAppend acc l1
+        merge2Helper (x:xs) (y:ys) acc
+            | x <= y    = merge2Helper xs (y:ys) (x:acc)
+            | otherwise = merge2Helper (x:xs) ys (y:acc)
+That's the whole thing! Want to test it out and then move on to mergeN?So I'm a bit confused because if I only have one list, I just need to return the other list. Why am I revAppending it? We haven't even like... gone through the list to have to reverse it?2:07 PMReally good catch! You're absolutely right. The acc hasn't been touched yet in the base cases — it still has elements in it from the recursive steps that came before.
+Think about it this way. Say you're merging [1,3] and [2]:
+
+merge2Helper [1,3] [2] [] → 1 < 2, push 1: merge2Helper [3] [2] [1]
+merge2Helper [3] [2] [1] → 3 > 2, push 2: merge2Helper [3] [] [2,1]
+Now l2 is empty! But acc = [2,1] and l1 = [3] still remain
+
+So you can't just return l1 — you need revAppend [2,1] [3] to get [1,2,3].
+The acc has been accumulating the whole time, so even in the base case it needs to be reversed and attached. Does that make sense?no I'm talking about like [] l2. A base case empty list where one of the lists is empty. Why are we returning a reversed list?2:08 PMOh you're asking about the case where the input lists start empty from the very beginning, before any recursion happens!
+You're right, if acc is still [] then revAppend [] l2 just returns l2 anyway, so it works out fine. revAppend with an empty first argument just returns the second argument unchanged.
+But the reason we write it that way is because that same base case handles BOTH situations:
+
+When l1 was empty from the start (acc is still [])
+When l1 ran out mid-recursion (acc has stuff in it)
+
+So it covers both with one line. Does that make sense?No. : ( Sorry I'm not confused why we have that because a base case tells the function when to terminate for recursion, and I get that. My point was let's say you try to pass in 2 lists and one is empty so you don't even have to touch the second list, it's already sorted and you just have to return it but we're reversing it upon return2:10 PMYou're making a totally valid point! If acc is [] (because no recursion has happened yet), then revAppend [] l2 is just returning l2 unchanged — the reverse does nothing.
+But here's the thing — that base case also gets hit mid-recursion when one list runs out but acc already has stuff in it. So we can't write it as just return l2 because that would be wrong in those cases.
+It's one line that handles both scenarios, even if it feels unnecessary in the "empty from the start" scenario.OMG I'm so stupid I see it. revAppend has a built in [] ys = ys to catch that2:10 PMYou're not stupid at all, you just worked it out yourself! That's exactly it:
+haskellrevAppend [] ys = ys  -- catches the "nothing to reverse" case
+So if acc is empty, it just hands back l2 untouched. You reasoned your way to it!
+Ready to move on to mergeN?but now I'm confused how once the list... why am I so bad at this?Let's walk through a list of [1,2,3] and [2,4,5,8] and merge those2:12 PMYou're not bad at this at all, you keep catching real issues! Let's just trace through it step by step:
+merge2Helper [1,2,3] [2,4,5,8] []
+1 <= 2, push 1 → merge2Helper [2,3] [2,4,5,8] [1]
+
+merge2Helper [2,3] [2,4,5,8] [1]
+2 <= 2, push 2 → merge2Helper [3] [2,4,5,8] [2,1]
+
+merge2Helper [3] [2,4,5,8] [2,1]
+3 > 2, push 2 → merge2Helper [3] [4,5,8] [2,2,1]
+
+merge2Helper [3] [4,5,8] [2,2,1]
+3 <= 4, push 3 → merge2Helper [] [4,5,8] [3,2,2,1]
+
+merge2Helper [] [4,5,8] [3,2,2,1]
+BASE CASE → revAppend [3,2,2,1] [4,5,8] = [1,2,2,3,4,5,8]
+See how acc built up backwards the whole time, and then revAppend fixed it at the end? What were you confused about?oookaaay I think I see what's happening now. I just needed to be walked through like a dummy. It's all clicking now. Mergehelper is creating two lists and revAppend is combining the lists, but only reversing the first list since the second list doesn't need to be reverse ordered. And it's taking the head and attaching it to the head of the second list. Okokok I get it.2:18 PMYou're not a dummy at all — you just needed to see it in action! And your explanation is spot on:
+
+merge2Helper builds the merged list backwards into acc
+revAppend reverses acc (the backwards part) and attaches the remaining sorted list to the end
+
+Ready to move on to mergeN? This one is actually much quicker — it's just one line using foldl and your merge2 function!So if we have somehting like this: merge2Helper l1 [] acc = revAppend acc l1It still uses this line, just ys is an empty list?revAppend (x:xs) ys = revAppend xs (x:ys)2:23 PMYes exactly! When l1 still has elements but l2 is empty, revAppend acc l1 hits that second case:
+haskellrevAppend (x:xs) ys = revAppend xs (x:ys)
+It peels elements off acc and prepends them to l1 one by one until acc is empty, then the first case revAppend [] ys = ys kicks in and returns the result.
+You've fully got it! Ready for mergeN?so naming conventions: can i name this merge2TailHelper? I don't think I can2:26 PMYou actually can name it whatever you want! merge2TailHelper is totally valid. As long as the name matches what you call in the main function:
+haskellmerge2Tail l1 l2 = merge2TailHelper l1 l2 []
+    where
+        merge2TailHelper [] l2 acc = revAppend acc l2
+        merge2TailHelper l1 [] acc = revAppend acc l1
+        merge2TailHelper (x:xs) (y:ys) acc
+            | x <= y    = merge2TailHelper xs (y:ys) (x:acc)
+            | otherwise = merge2TailHelper (x:xs) ys (y:acc)
+Haskell just needs consistency between the definition and the calls. Name it whatever makes sense to you!we aren't merging the lists at all until we call revAppend, yeah?2:29 PMYes exactly! merge2Helper is just sorting out the order and building acc. No actual "combining" happens until revAppend is called in the base case. That's the moment everything comes together into one final list.when are we pulling things OFF the head of the list?2:30 PMEvery step of the recursion! When you pattern match (x:xs) and (y:ys), you're pulling x off the head of l1 and y off the head of l2, comparing them, and pushing the smaller one onto acc. Then the next recursive call does the same thing with the remaining lists.
+So elements are constantly being pulled off the heads of both lists the whole way through!So it's happening automatically? I should know this. XD2:31 PMYes, it's happening automatically through pattern matching! When you write:
+haskellmerge2TailHelper (x:xs) (y:ys) acc
+Haskell automatically destructures the lists for you — x is the head, xs is the tail. You're not manually pulling anything off, the pattern match does it for you.
+It's one of those things that feels like magic but you've been using it this whole assignment without thinking about it — you did the same thing in merge2 and even back in HW1 with exists!Ok so this is what i have so far:-- CptS 355 - Spring 2026 Assignment 2
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched in .txt, .md, or .pdf format)
+  
+{- 
+Name: Camille Orego
+GitHub Repo: https://github.com/Azantei/CptS-355-Programming-Language-Design
+Helpers: Claude Sonnet 4.5 
+        (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design/tree/main/Haskell/Assignment-2/Logs)
+-}   
+
+module HW2
+     where
+
+
+{- 1-  merge2 & merge2Tail & mergeN - 22% -}
+-- merge2
+merge2 :: Ord a => [a] -> [a] -> [a]
+-- Base cases: if one list is empty, return the other list
+merge2 [] l2 = l2
+merge2 l1 [] = l1
+-- Otherwise, compare the heads of both lists and merge accordingly
+merge2 (x:xs) (y:ys)
+     -- If x is less than or equal to y, x goes first, followed by the merge of the rest of l1 and all of l2
+     | x <= y    = x : merge2 xs (y:ys) -- x is the head
+     -- If y is less than x, y goes first, followed by the merge of all of l1 and the rest of l2
+     | otherwise = y : merge2 (x:xs) ys -- y is the head
+
+--merge2Tail
+merge2Tail :: Ord a => [a] -> [a] -> [a]
+
+merge2Tail l1 l2 = merge2TailHelper l1 l2 []
+    where
+        -- Base cases: empty list calls revAppend on existing list
+        merge2TailHelper [] l2 acc = revAppend acc l2 -- won't need to reverse
+        merge2TailHelper l1 [] acc = revAppend acc l1 -- will need to reverse l1
+        -- Otherwise, compare the heads of both lists and merge accordingly
+        merge2TailHelper (x:xs) (y:ys) acc
+               -- If x is less than or equal to y, we push x onto head of accumulator list
+               | x <= y    = merge2TailHelper xs (y:ys) (x:acc)
+               -- If y is less than x, we push y onto head of accumulator list
+               | otherwise = merge2TailHelper (x:xs) ys (y:acc)
+
+-- revAppend function for merge2Tail (above)
+revAppend :: [a] -> [a] -> [a]
+-- Base case: if the first list is empty, return the second list 
+--(don't need to reverse anything)
+revAppend [] ys = ys
+-- Append the head of the first list to the head of the second list
+-- (reverse the first list since that is the one being built up in reverse order)
+revAppend (x:xs) ys = revAppend xs (x:ys)
+
+--mergeN
+
+
+{- 2 - getInRange & countInRange - 18% -}
+
+--getInRange
+
+
+--countInRange
+
+
+
+{- 3 -  addLengths & addAllLengths - 18% -}
+
+data LengthUnit =  INCH  Int | FOOT  Int | YARD  Int
+                   deriving (Show, Read, Eq)
+-- addLengths
+
+-- addAllLengths
+
+{-4 - sumTree and createSumTree - 22%-}
+
+data Tree a = LEAF a | NODE a  (Tree a)  (Tree a)
+              deriving (Show, Read, Eq)
+
+--sumTree
+
+
+--createSumTree
+
+
+{-5 - foldListTree - 20%-}
+data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
+                  deriving (Show, Read, Eq)
+
+
+
+{- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -}Show more2:31 PMThis looks really great! Your comments are clear and your code is clean. One small thing — your comment on the first base case of merge2TailHelper says "won't need to reverse" but that's not quite accurate since acc could have stuff in it at that point (as we walked through earlier). Maybe something like "reverse acc onto remaining l2" instead.
+Now for mergeN! This one is just one line. The idea is you have a list of sorted lists and you want to fold merge2 over them. So you're essentially doing:
+merge2 (merge2 (merge2 [] [1,2]) [10,12]) [2,5,6,8,9]
+The base/starting value for the fold would be []. Can you write that using foldl?
+haskellmergeN :: Ord a => [[a]] -> [a]
+mergeN lists = foldl ?? ?? ??Ok so if the acc is empty, though, it doesn't need to reverse. I think that's what my brain was doing2:33 PMYou're right! If acc is [] from the start, revAppend [] l2 just hits the first case and returns l2 unchanged. So your comment is technically correct for that scenario!
+But the comment could be misleading because that same line also handles the mid-recursion case where acc has stuff in it. Maybe just say something neutral like "reverse acc onto remaining l2" to cover both cases.
+Anyway, mergeN! Give it a shot:
+haskellmergeN :: Ord a => [[a]] -> [a]
+mergeN lists = foldl ?? ?? ??
+The three ??s are the function, the starting value, and the list to fold over!I got a little lost with the foldl and foldr in class. D:
+So we're using our first function. we have a list of lists already in ascending order and creating a new list of all those lists merged and listed in ascending order. I'm not using explicit recursion?2:40 PMRight, no explicit recursion — that's why we use foldl!
+Think of foldl as a way to repeatedly apply a function across a list, carrying a result forward. The signature is:
+foldl function startingValue list
+So for mergeN, you want to:
+
+Start with [] (empty merged list)
+Go through each sublist
+Merge it into what you have so far using merge2
+
+So it's basically:
+foldl merge2 [] [[1,2],[10,12],[2,5,6,8,9]]
+Which does:
+merge2 (merge2 (merge2 [] [1,2]) [10,12]) [2,5,6,8,9]
+Can you write the full function now?and we don't know how many lists are in our list of lists.2:41 PMExactly! And that's the beauty of foldl — it doesn't matter how many lists are in there. It just keeps merging one by one until it runs out.
+So can you fill in the three parts?
+haskellmergeN :: Ord a => [[a]] -> [a]
+mergeN lists = foldl ?? ?? ??
+
+The function to apply is...?
+The starting value is...?
+The list to fold over is...?
+Probably not but I can try. XD Can you give me a hint2:41 PMYou've already named all three pieces! Just fill in the blanks:
+
+The function: you want to merge two lists together, you have a function that does exactly that...
+The starting value: what's an empty merged list?
+The list to fold over: what did you call your input?
+mergeN :: Ord a => [[a]] -> [a] 
+mergeN lists = foldl ?? ?? ??foldl merge2 [] lists2:44 PMYou got it! That's the whole thing:
+haskellmergeN :: Ord a => [[a]] -> [a]
+mergeN lists = foldl merge2 [] lists
+You can actually even shorten it to:
+haskellmergeN :: Ord a => [[a]] -> [a]
+mergeN = foldl merge2 []
+But the first version is perfectly fine and more readable. That's problem 1 done! Ready to move on to getInRange?oh that was the answer? XD so what's going on so I can understand it2:45 PMHaha yes that was it! foldl does all the heavy lifting.
+Here's what's happening step by step with mergeN [[1,2],[10,12],[2,5,6,8,9]]:
+start:          acc = []
+merge2 [] [1,2]         → acc = [1,2]
+merge2 [1,2] [10,12]    → acc = [1,2,10,12]
+merge2 [1,2,10,12] [2,5,6,8,9] → acc = [1,2,2,5,6,8,9,10,12]
+foldl just takes each sublist one at a time and merges it into the accumulated result. Since each sublist is already sorted and merge2 produces a sorted result, the final list is sorted too!
+Ready for problem 2?so this is just a built in functionality of foldl2:45 PMYes! That's exactly the power of foldl. You just give it:
+
+A function that combines two things
+A starting value
+A list to work through
+
+And it handles all the repetition for you. No recursion needed on your end. merge2 does the merging, foldl does the looping. They just work together naturally.
+Ready for problem 2?Maybe just give me a comment to put in there similar to my other ones2:46 PMSure! Something like:
+haskell-- mergeN uses foldl to repeatedly apply merge2 across a list of sorted lists,
+-- accumulating the merged result starting from an empty list
+mergeN :: Ord a => [[a]] -> [a]
+mergeN lists = foldl merge2 [] lists
+Ready for problem 2?foldl is expecting 3 parameters?2:48 PMYes! foldl always takes 3 arguments:
+foldl function startingValue list
+So foldl merge2 [] lists maps to:
+
+function = merge2
+startingValue = []
+list = lists
+
+And merge2 itself takes 2 arguments — the accumulated result so far and the next sublist. foldl feeds those in automatically at each step!

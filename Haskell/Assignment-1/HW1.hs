@@ -1,4 +1,4 @@
-{- 
+{-
 CptS 355 - Spring 2026 Assignment 1
 Please include your name and the names of the students with whom you discussed any of the problems in this homework
 Name: Camille Orego

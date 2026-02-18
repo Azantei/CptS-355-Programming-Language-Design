@@ -1,0 +1,283 @@
+pdfHW2.hshsOk so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thrilled about but desperate times and all that. #1 is done, let's move onto #2. I'll paste my #1 here-- CptS 355 - Spring 2026 Assignment 2
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched in .txt, .md, or .pdf format)
+  
+{- 
+Name: Camille Orego
+GitHub Repo: https://github.com/Azantei/CptS-355-Programming-Language-Design
+Helpers: Claude Sonnet 4.5 
+        (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design/tree/main/Haskell/Assignment-2/Logs)
+-}   
+
+module HW2
+     where
+
+
+{- 1-  merge2 & merge2Tail & mergeN - 22% -}
+-- merge2
+merge2 :: Ord a => [a] -> [a] -> [a]
+-- Base cases: if one list is empty, return the other list
+merge2 [] l2 = l2
+merge2 l1 [] = l1
+-- Otherwise, compare the heads of both lists and merge accordingly
+merge2 (x:xs) (y:ys)
+     -- If x is less than or equal to y, x goes first, followed by the merge of the rest of l1 and all of l2
+     | x <= y    = x : merge2 xs (y:ys) -- x is the head
+     -- If y is less than x, y goes first, followed by the merge of all of l1 and the rest of l2
+     | otherwise = y : merge2 (x:xs) ys -- y is the head
+
+--merge2Tail
+merge2Tail :: Ord a => [a] -> [a] -> [a]
+
+merge2Tail l1 l2 = merge2TailHelper l1 l2 []
+    where
+        -- Base cases: empty list calls revAppend on existing list
+        merge2TailHelper [] l2 acc = revAppend acc l2
+        merge2TailHelper l1 [] acc = revAppend acc l1
+        -- Otherwise, compare the heads of both lists and merge accordingly
+        merge2TailHelper (x:xs) (y:ys) acc
+               -- If x is less than or equal to y, we push x onto head of accumulator list
+               | x <= y    = merge2TailHelper xs (y:ys) (x:acc)
+               -- If y is less than x, we push y onto head of accumulator list
+               | otherwise = merge2TailHelper (x:xs) ys (y:acc)
+
+-- revAppend function for merge2Tail (above)
+revAppend :: [a] -> [a] -> [a]
+-- Base case: if the first list is empty, return the second list 
+--(don't need to reverse anything - especially if accumulator list from merge2TailHelper is empty)
+revAppend [] ys = ys
+-- Append the head of the first list to the head of the second list
+-- (reverse the first list since that is the one being built up in reverse order)
+revAppend (x:xs) ys = revAppend xs (x:ys)
+
+--mergeN
+mergeN :: Ord a => [[a]] -> [a]
+-- use foldl to repeatedly apply merge2 to the list of lists,
+-- starting with an empty list as the initial accumulator value
+-- foldl parameters: foldl function startingValue list
+mergeN lists = foldl merge2 [] lists
+
+
+{- 2 - getInRange & countInRange - 18% -}
+
+--getInRange
+
+
+--countInRange
+
+
+
+{- 3 -  addLengths & addAllLengths - 18% -}
+
+data LengthUnit =  INCH  Int | FOOT  Int | YARD  Int
+                   deriving (Show, Read, Eq)
+-- addLengths
+
+-- addAllLengths
+
+{-4 - sumTree and createSumTree - 22%-}
+
+data Tree a = LEAF a | NODE a  (Tree a)  (Tree a)
+              deriving (Show, Read, Eq)
+
+--sumTree
+
+
+--createSumTree
+
+
+{-5 - foldListTree - 20%-}
+data ListTree a = ListLEAF [a] | ListNODE [(ListTree a)]
+                  deriving (Show, Read, Eq)
+
+
+
+{- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -}Show more2:52 PMGood luck on your exam tomorrow! Let's knock out #2 quickly.
+haskell{- 2 - getInRange & countInRange - 18% -}
+
+-- getInRange
+getInRange :: Ord a => a -> a -> [a] -> [a]
+-- Use filter with a lambda that checks if value is strictly between v1 and v2
+getInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iL
+
+-- countInRange
+countInRange :: Ord a => a -> a -> [[a]] -> Int
+-- map getInRange over each sublist to get filtered sublists,
+-- then map length over those, then sum them all up with foldl
+countInRange v1 v2 iL = foldl (+) 0 (map (\sublist -> length (getInRange v1 v2 sublist)) iL)
+Quick breakdown:
+getInRange — just filter with a predicate checking both bounds. Clean and simple.
+countInRange — the key constraint is don't flatten first. So the approach is:
+
+map a function over each sublist that gets the in-range elements and takes their length
+foldl (+) 0 to sum up all those counts
+
+You could also write the inner lambda as (length . getInRange v1 v2) if you want to be fancy with function composition, but the lambda is more readable under time pressure.
+Drop this in and you're good to move to #3!
+Cpts355_Assignment2_Haskell.pdf
+pdf
+
+
+HW2SampleTests.hs
+hs
+
+
+HW2.hs
+hs
+
+Ok so I need to speed do this a bit. Exam is tomorrow and he suggested having this done by then, so I'll sadly need to rely on you a bit heavily and go through this more thoroughly after the exam, which I'm not thripastedOh wow you just gave me the answer. In fairness to you I didn't really tell you not to. Here was our last conversation so you can kind of build off it.2:54 PMHa, fair enough! Yeah I jumped straight to the answer there. For #2 I'll be a bit more guided but not hand-holdy since you're pressed for time.
+Here's the approach for getInRange — just filter with a predicate checking both bounds. Give it a shot:
+haskellgetInRange :: Ord a => a -> a -> [a] -> [a]
+getInRange v1 v2 iL = filter (\x -> ??) iL
+What should the lambda check?
+For countInRange, once you have getInRange working, think about what you need to do to each sublist, and then how to combine the results. The key constraint is don't flatten first — so you'll need to map something over iL and then fold the counts together.
+What do you think the map step should do to each sublist?Um what does filter do? what's a predicate? what's the lambda? Haha4:12 PMOk let's back up!
+Filter goes through a list and keeps only the elements that satisfy some condition. Like if you have [1,2,3,4,5] and you want only the even numbers, filter keeps the ones where the condition is true.
+Predicate is just a fancy word for "a function that returns True or False." So the condition you're checking is the predicate.
+Lambda is just an anonymous function — a function you write inline without giving it a name. In Haskell the syntax is (\x -> something with x). The backslash is meant to look like a lambda symbol (λ).
+So putting it together, filter (\x -> x > 3) [1,2,3,4,5] gives you [4,5] because it keeps every x where x > 3 is True.
+For getInRange, you want to keep values that are greater than v1 AND less than v2. Can you write that predicate? It'll look like:
+haskellfilter (\x -> ?? && ??) iL
+What goes in the two ?? spots?I knew what a lambda function is. I don't know why I asked that. haha\x -> x > v1 && x < v24:16 PMHaha that's it! So the full function is just:
+haskellgetInRange :: Ord a => a -> a -> [a] -> [a]
+getInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iL
+Now for countInRange — you have a nested list [[a]] and you want to count how many values across all sublists fall in range. No flattening allowed.
+Think about it in two steps:
+
+Apply getInRange v1 v2 to each sublist to get the filtered sublists
+Get the length of each, then sum them all up
+
+What higher order function would you use for step 1 — applying something to every sublist?foldl?4:18 PMClose! foldl is for combining a list down to a single value. But for step 1 you want to apply a function to every element and get a list back — that's map!
+So map (getInRange v1 v2) iL would turn [[1,2,3,4],[5,6,7,8,9],[10,11]] into [[4],[5,6,7,8,9],[]] (keeping only in-range values from each sublist).
+Then for step 2, you need to get the length of each sublist and sum them up. That's where foldl comes in!
+So the structure is roughly:
+haskellcountInRange v1 v2 iL = foldl ?? 0 (map ?? iL)
+What do you think goes in the two ?? spots?the list?4:19 PMWhich list specifically? There are two ?? spots — one is a function, one is the list. Let's take them separately.
+For the map part: map ?? iL — what function do you want to apply to each sublist?well map would want a list to map to. Foldl wants probably a high order function that takes 0 and the function as parameters?4:21 PMYou're on the right track but let's slow down. Two separate questions:
+For the map part: map takes a function and a list. The list is iL. What function do you want to apply to each sublist? You just wrote a function that takes a sublist and returns only the in-range values...I don't knooooow4:22 PMYou literally just wrote it! getInRange v1 v2 — that's the function that takes a sublist and returns only the in-range values.
+So map (getInRange v1 v2) iL applies it to every sublist.
+Then for the fold, you want to sum up the lengths. So for each sublist, you need its length, then add them all together starting from 0.
+haskellfoldl (\acc sublist -> acc + length sublist) 0 (map (getInRange v1 v2) iL)
+Does that make sense? The lambda takes the running total acc and adds the length of the next sublist to it.I could not be more lost.4:23 PMOk let's slow way down. Forget the code for a second.
+You have this nested list: [[1,2,3,4],[5,6,7,8,9],[10,11]]
+And say your range is 3 to 10.
+If you ran getInRange 3 10 on just the first sublist [1,2,3,4], what would you get back?3?4:23 PMClose! But remember getInRange is exclusive — it returns values strictly between v1 and v2. So getInRange 3 10 [1,2,3,4] would give you [4].
+Not the number 3, but a list containing just 4. Does that make sense?Oh, yeah ok. So it pulls out the numbers between 3 and 10 in the list ok4:24 PMExactly! So now if you ran getInRange 3 10 on each sublist:
+
+getInRange 3 10 [1,2,3,4] → [4]
+getInRange 3 10 [5,6,7,8,9] → [5,6,7,8,9]
+getInRange 3 10 [10,11] → []
+
+Now you just need to count how many total values are in those results. How would you count the total?iunno. I mean a normal language you could have a counter. This one you could probably just pull the index number of the farther point4:24 PMHaskell actually has a built in length function! So length [4] gives you 1, length [5,6,7,8,9] gives you 5, length [] gives you 0.
+So after applying getInRange to each sublist you'd have:
+
+length [4] → 1
+length [5,6,7,8,9] → 5
+length [] → 0
+
+Then you just need to add those up: 1 + 5 + 0 = 6.
+So the steps are:
+
+Apply getInRange v1 v2 to each sublist → map
+Get the length of each result → another map
+Add them all up → foldl (+) 0
+
+Does breaking it into those 3 steps make more sense?what is map doing?4:25 PMmap applies a function to every element in a list and gives you back a new list of the results.
+So if you have [1, 2, 3] and you do map (+1) [1,2,3] you get [2, 3, 4]. It went through every element and added 1 to it.
+In your case, your list is [[1,2,3,4],[5,6,7,8,9],[10,11]] — a list of sublists. So map would go through each sublist and apply whatever function you give it.
+What function do you want to apply to each sublist?ok so we want to go through each function and find if it's inrange, and then go through each of those inragen lists and return a length?4:26 PMYes! Exactly that! So:
+Step 1: map (getInRange v1 v2) iL goes through each sublist and filters it, giving you [[4],[5,6,7,8,9],[]]
+Step 2: map length on that result goes through each filtered sublist and gets its length, giving you [1,5,0]
+Step 3: foldl (+) 0 adds them all up, giving you 6
+So chaining it all together:
+haskellcountInRange v1 v2 iL = foldl (+) 0 (map length (map (getInRange v1 v2) iL))
+Does that make sense now that you can see all three steps?and we're using foldl to apply to every list in the list of lists? what's the (+) and 0? We're adding zero?4:27 PMNo, foldl isn't being used on the list of lists here — map already handled that part! foldl is just adding up the final list of numbers [1, 5, 0].
+foldl (+) 0 [1,5,0] works like:
+
+Start with 0
+0 + 1 = 1
+1 + 5 = 6
+6 + 0 = 6
+
+The 0 is just the starting value — like initializing a counter to zero before you start adding. The (+) is just the addition function written in a way Haskell can pass it around.
+So foldl (+) 0 is basically just "sum up this list of numbers." Does that click?0 is the addition identity so I get that part. What if it was a 1?4:28 PMThen it would start at 1 and your final answer would be off by 1! You'd get 7 instead of 6. The starting value matters because it's what you're accumulating onto, so for addition you always want to start at 0.
+Does the full function make sense now?
+haskellcountInRange :: Ord a => a -> a -> [[a]] -> Int
+countInRange v1 v2 iL = foldl (+) 0 (map length (map (getInRange v1 v2) iL))kind of weird that we even need to do that but Haskell gonna Haskell I guess4:28 PMHaha it's actually not that weird! Every language needs some way to sum a list. Python has sum(), which is just a shorthand for the same thing. Haskell just makes you see what's actually happening under the hood.
+You could actually also write it as sum instead of foldl (+) 0 since Haskell does have that built in:
+haskellcountInRange v1 v2 iL = sum (map length (map (getInRange v1 v2) iL))
+A bit cleaner! Ready to move on to #3?wait what is the GetinRange function?4:28 PMIt's the function you just wrote!
+haskellgetInRange :: Ord a => a -> a -> [a] -> [a]
+getInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iL
+It takes two bounds and a list, and returns only the elements strictly between those bounds. We're using it inside countInRange to filter each sublist before counting.wait I'm confused what is the countinrange? OMG I HATE THIS Haha4:29 PMHaha don't hate it! Let's just break it down simply.
+You have a nested list like [[1,2,3,4],[5,6,7,8,9],[10,11]] and you want to count how many numbers total are between 3 and 10.
+countInRange does it in 3 steps:
+
+Use getInRange on each sublist to filter out the in-range values
+Get the length of each filtered sublist
+Add all the lengths together
+
+So for [[1,2,3,4],[5,6,7,8,9],[10,11]] with range 3 to 10:
+
+[1,2,3,4] → filtered → [4] → length 1
+[5,6,7,8,9] → filtered → [5,6,7,8,9] → length 5
+[10,11] → filtered → [] → length 0
+Total: 1 + 5 + 0 = 6
+
+That's all countInRange is doing! Does that help?Claude. You're confusing me. I'm thinking we're on the getInRangeand you have both done. It's totally not your fault. Ok just give me both functions again so I can break them down4:30 PMHere they are!
+haskell-- getInRange: filters a single list to only values strictly between v1 and v2
+getInRange :: Ord a => a -> a -> [a] -> [a]
+getInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iL
+
+-- countInRange: counts how many values across ALL sublists are strictly between v1 and v2
+countInRange :: Ord a => a -> a -> [[a]] -> Int
+countInRange v1 v2 iL = sum (map length (map (getInRange v1 v2) iL))
+The key difference is getInRange works on a single flat list [a], while countInRange works on a nested list [[a]] and returns a count.
+Does that help clarify where we are?I got lost and was in the wrong conversation. So here's the back and forth:
+foldl is expecting 3 parameters?
+2:48 PM
+Yes! foldl always takes 3 arguments:foldl function startingValue listSo foldl merge2 [] lists maps to:
+* function = merge2
+* startingValue = []
+* list = lists
+And merge2 itself takes 2 arguments — the accumulated result so far and the next sublist. foldl feeds those in automatically at each step!
+Ok so filter is a higher order function that takes a function and a list and returns
+4:36 PM
+A filtered list! Specifically it returns only the elements from the list where the function returns True.
+So for getInRange you want to return only elements that are greater than v1 AND less than v2. That sounds like a perfect job for filter!
+haskellgetInRange :: Ord a => a -> a -> [a] -> [a]
+getInRange v1 v2 iL = filter ?? iLWhat condition do you want to filter by?
+so it's filter :: () []
+4:37 PM
+Yes! filter takes a function (the condition) and a list:filter :: (a -> Bool) -> [a] -> [a]So for getInRange you want elements where element > v1 AND element < v2. You can write that as a lambda:
+haskellgetInRange v1 v2 iL = filter (\x -> x > v1 && x < v2) iLThe \x -> is Haskell's lambda syntax, meaning "a function that takes x and returns...". Does that make sense?
+so we can call sum (map length (map (getinrange v1 v2) iL)) as what? i think there's a term for nesting functions like that
+4:39 PM
+Function composition! Or more generally, function chaining.
+In Haskell you can also express it using the . operator:
+haskell(sum . map length . map (getInRange v1 v2)) iLBut for countInRange specifically, what you described is exactly right! You want to:
+1. Apply getInRange v1 v2 to each sublist → map (getInRange v1 v2) iL
+2. Get the length of each result → map length ...
+3. Sum them all up → sum ...
+Want to try writing the full countInRange function?
+is this currying?
+4:39 PM
+Sort of related but not exactly the same thing!
+Currying is when a function that takes multiple arguments is transformed into a series of functions that each take one argument. In Haskell everything is actually curried by default — that's why getInRange v1 v2 works as a partially applied function you can pass to map!
+Function composition is the nesting/chaining of functions together like sum . map length . map (getInRange v1 v2).
+They're related concepts but distinct. Currying is what allows you to partially apply getInRange v1 v2 and pass it to map — which is what makes the composition work so cleanly!
+Want to write out countInRange now?
+So for countinRange we're mapping a list of in range between 2 values, then mapping the length, then summing that list
+4:44 PM
+Exactly right! So can you write it out?
+haskellcountInRange :: Ord a => a -> a -> [[a]] -> Int
+countInRange v1 v2 iL = ?? (map ?? (map ?? iL))Three functions to fill in!Show more4:46 PMOk so you're basically there! Fill in the three ??:
+haskellcountInRange :: Ord a => a -> a -> [[a]] -> Int
+countInRange v1 v2 iL = ?? (map ?? (map ?? iL))
+
+The innermost map ?? iL — what function do you want to apply to each sublist to filter it?
+The middle map ?? — what do you want to get from each filtered sublist?
+The outermost ?? — what do you want to do with the list of lengths?
+So what happened to this function?
+countInRange v1 v2 iL = foldl (+) 0 (map length (map (getInRange v1 v2) iL))vs the one I have:countInRange v1 v2 iL = sum (map length (map (getInRange v1 v2) iL))4:46 PMThey're the same thing! sum is just shorthand for foldl (+) 0. Both add up a list of numbers starting from 0.
+So pick whichever feels more readable to you. sum is cleaner, foldl (+) 0 makes it more explicit what's happening. Either will work!
