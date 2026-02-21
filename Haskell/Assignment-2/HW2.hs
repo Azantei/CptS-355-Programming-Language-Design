@@ -5,7 +5,7 @@
 {- 
 Name: Camille Orego
 GitHub Repo: https://github.com/Azantei/CptS-355-Programming-Language-Design
-Helpers: Claude Sonnet 4.5 
+Helpers: Claude Sonnet 4.6 
         (in log conversations on GitHub: https://github.com/Azantei/CptS-355-Programming-Language-Design/tree/main/Haskell/Assignment-2/Logs)
 -}   
 

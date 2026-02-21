@@ -11,6 +11,10 @@ To run the tests type "runTestTT tests" at the Haskell prompt.  -}
    for each problem (at least 2 new tests per subproblem).
    
    To run: runTestTT tests  (or use the shortcut: run)
+
+   AI generated testing.  I used Claude Sonnet 4.6 to generate additional test cases for each problem, including edge cases. 
+   I provided the problem description and sample tests as context for the AI, and then asked it to generate new test cases 
+   that would cover different scenarios and edge cases.
 -}
 
 module HW2Tests
