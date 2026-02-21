@@ -167,13 +167,23 @@ foldListTree f base (ListNODE subtrees) = foldl f base (map (foldListTree f base
 -----------------------------------------------------------------
 
 {- 6- Create two tree values :  Tree Integer  and  listTree a ;  Both trees should have at least 3 levels. -  4% -}
+
 -- Tree Integer example (3+ levels)
+-- Structure: root NODE with two subtrees, each containing at least one more level
+-- Left subtree: NODE -> NODE -> LEAFs (3 levels deep)
+-- Right subtree: NODE -> LEAFs (2 levels)
+-- Leaf values: 2, 3, 4, 5, 6
 myTree :: Tree Integer
 myTree = NODE 0
     (NODE 0 (LEAF 2) (NODE 0 (LEAF 3) (LEAF 4)))
     (NODE 0 (LEAF 5) (LEAF 6))
 
--- ListTree example (3+ levels)
+
+-- ListTree Integer example (3+ levels)
+-- Structure: root ListNODE containing 3 children:
+--   - ListNODE with two ListLEAFs
+--   - ListNODE containing a ListNODE (3rd level) and a ListLEAF
+--   - ListLEAF at root level
 myListTree :: ListTree Integer
 myListTree = ListNODE 
     [ ListNODE [ ListLEAF [1,2,3], ListLEAF [4,5] ],
