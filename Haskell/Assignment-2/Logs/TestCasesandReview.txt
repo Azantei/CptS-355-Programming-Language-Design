@@ -1,0 +1,276 @@
+pdf-- CptS 355 - Spring 2026 Assignment 2
+-- Please include your name and the names of the students with whom you discussed any of the problems in this homework
+-- Also include a statement identifying the extent of your AI use (to include "None" if appropriate) and a log of your AI use (or attacched pastedI think I just need to add comments to #6 and then do tests5:44 PMLooking at your code, it's solid! You just need to add comments to the myTree and myListTree definitions in #6, then write the test file. Let me help with both.
+Comments to add for #6:
+haskell-- Tree Integer example (3+ levels)
+-- Structure: root NODE with two subtrees, each containing at least one more level
+-- Left subtree: NODE -> NODE -> LEAFs (3 levels deep)
+-- Right subtree: NODE -> LEAFs (2 levels)
+-- Leaf values: 2, 3, 4, 5, 6
+myTree :: Tree Integer
+myTree = NODE 0
+    (NODE 0 (LEAF 2) (NODE 0 (LEAF 3) (LEAF 4)))
+    (NODE 0 (LEAF 5) (LEAF 6))
+
+-- ListTree Integer example (3+ levels)
+-- Structure: root ListNODE containing 3 children:
+--   - ListNODE with two ListLEAFs
+--   - ListNODE containing a ListNODE (3rd level) and a ListLEAF
+--   - ListLEAF at root level
+myListTree :: ListTree Integer
+myListTree = ListNODE 
+    [ ListNODE [ ListLEAF [1,2,3], ListLEAF [4,5] ],
+      ListNODE [ ListLEAF [6,7], ListNODE [ListLEAF [8,9], ListLEAF [10]] ],
+      ListLEAF [11,12] ]
+HW2Tests.hs — here's a full test file with 2+ tests per subproblem:
+haskell-- CptS 355 - Spring 2026 Assignment 2 Tests
+-- Name: Camille Orego
+
+module HW2Tests where
+
+import HW2
+import Test.HUnit
+
+-- ==================== Problem 1: merge2 ====================
+
+test_merge2_duplicates :: Test
+test_merge2_duplicates = TestCase (assertEqual "merge2 with all duplicates"
+    [1,1,2,2,3,3]
+    (merge2 [1,2,3] [1,2,3]))
+
+test_merge2_emptyFirst :: Test
+test_merge2_emptyFirst = TestCase (assertEqual "merge2 empty first list"
+    [1,2,3]
+    (merge2 [] [1,2,3]))
+
+test_merge2_negatives :: Test
+test_merge2_negatives = TestCase (assertEqual "merge2 with negative numbers"
+    [-5,-3,-1,0,2,4]
+    (merge2 [-5,-1,2] [-3,0,4]))
+
+-- ==================== Problem 1b: merge2Tail ====================
+
+test_merge2Tail_basic :: Test
+test_merge2Tail_basic = TestCase (assertEqual "merge2Tail basic"
+    [1,2,3,4,5,6]
+    (merge2Tail [1,3,5] [2,4,6]))
+
+test_merge2Tail_emptyBoth :: Test
+test_merge2Tail_emptyBoth = TestCase (assertEqual "merge2Tail both empty"
+    []
+    (merge2Tail [] ([] :: [Int])))
+
+test_merge2Tail_singletons :: Test
+test_merge2Tail_singletons = TestCase (assertEqual "merge2Tail singletons"
+    [1,2]
+    (merge2Tail [1] [2]))
+
+-- ==================== Problem 1c: mergeN ====================
+
+test_mergeN_empty :: Test
+test_mergeN_empty = TestCase (assertEqual "mergeN empty list of lists"
+    []
+    (mergeN ([] :: [[Int]])))
+
+test_mergeN_singleSublist :: Test
+test_mergeN_singleSublist = TestCase (assertEqual "mergeN single sublist"
+    [1,2,3]
+    (mergeN [[1,2,3]]))
+
+test_mergeN_fourLists :: Test
+test_mergeN_fourLists = TestCase (assertEqual "mergeN four lists"
+    [1,2,3,4,5,6,7,8]
+    (mergeN [[1,5],[2,6],[3,7],[4,8]]))
+
+-- ==================== Problem 2a: getInRange ====================
+
+test_getInRange_allOut :: Test
+test_getInRange_allOut = TestCase (assertEqual "getInRange all elements out of range"
+    []
+    (getInRange 0 10 [0,10,20,30]))
+
+test_getInRange_allIn :: Test
+test_getInRange_allIn = TestCase (assertEqual "getInRange all elements in range"
+    [1,2,3,4]
+    (getInRange 0 5 [1,2,3,4]))
+
+test_getInRange_strings :: Test
+test_getInRange_strings = TestCase (assertEqual "getInRange with strings"
+    ["b","c"]
+    (getInRange "a" "d" ["a","b","c","d","e"]))
+
+-- ==================== Problem 2b: countInRange ====================
+
+test_countInRange_empty :: Test
+test_countInRange_empty = TestCase (assertEqual "countInRange empty nested list"
+    0
+    (countInRange 0 10 []))
+
+test_countInRange_allEmpty :: Test
+test_countInRange_allEmpty = TestCase (assertEqual "countInRange all empty sublists"
+    0
+    (countInRange 0 10 [[],[],[]]))
+
+test_countInRange_mixed :: Test
+test_countInRange_mixed = TestCase (assertEqual "countInRange mixed sublists"
+    4
+    (countInRange 0 6 [[1,2],[3,4],[5,6,7]]))
+
+-- ==================== Problem 3a: addLengths ====================
+
+test_addLengths_yardYard :: Test
+test_addLengths_yardYard = TestCase (assertEqual "addLengths YARD + YARD"
+    (INCH 72)
+    (addLengths (YARD 1) (YARD 1)))
+
+test_addLengths_inchFoot :: Test
+test_addLengths_inchFoot = TestCase (assertEqual "addLengths INCH + FOOT"
+    (INCH 13)
+    (addLengths (INCH 1) (FOOT 1)))
+
+test_addLengths_yardFoot :: Test
+test_addLengths_yardFoot = TestCase (assertEqual "addLengths YARD + FOOT"
+    (INCH 48)
+    (addLengths (YARD 1) (FOOT 1)))
+
+-- ==================== Problem 3b: addAllLengths ====================
+
+test_addAllLengths_empty :: Test
+test_addAllLengths_empty = TestCase (assertEqual "addAllLengths empty list"
+    (INCH 0)
+    (addAllLengths []))
+
+test_addAllLengths_emptySublist :: Test
+test_addAllLengths_emptySublist = TestCase (assertEqual "addAllLengths with empty sublists"
+    (INCH 24)
+    (addAllLengths [[], [FOOT 2], []]))
+
+test_addAllLengths_mixed :: Test
+test_addAllLengths_mixed = TestCase (assertEqual "addAllLengths mixed units"
+    (INCH 85)
+    (addAllLengths [[YARD 1, FOOT 1], [INCH 13]]))
+
+-- ==================== Problem 4a: sumTree ====================
+
+test_sumTree_singleLeaf :: Test
+test_sumTree_singleLeaf = TestCase (assertEqual "sumTree single leaf"
+    42
+    (sumTree (LEAF 42)))
+
+test_sumTree_myTree :: Test
+test_sumTree_myTree = TestCase (assertEqual "sumTree myTree (leaves: 2,3,4,5,6)"
+    20
+    (sumTree myTree))
+
+test_sumTree_symmetric :: Test
+test_sumTree_symmetric = TestCase (assertEqual "sumTree symmetric tree"
+    10
+    (sumTree (NODE 0 (NODE 0 (LEAF 1) (LEAF 2)) (NODE 0 (LEAF 3) (LEAF 4)))))
+
+-- ==================== Problem 4b: createSumTree ====================
+
+test_createSumTree_leaf :: Test
+test_createSumTree_leaf = TestCase (assertEqual "createSumTree single leaf unchanged"
+    (LEAF 7)
+    (createSumTree (LEAF 7)))
+
+test_createSumTree_myTree :: Test
+test_createSumTree_myTree = TestCase (assertEqual "createSumTree myTree"
+    (NODE 20 
+        (NODE 9 (LEAF 2) (NODE 7 (LEAF 3) (LEAF 4))) 
+        (NODE 11 (LEAF 5) (LEAF 6)))
+    (createSumTree myTree))
+
+test_createSumTree_simple :: Test
+test_createSumTree_simple = TestCase (assertEqual "createSumTree simple 2-leaf tree"
+    (NODE 3 (LEAF 1) (LEAF 2))
+    (createSumTree (NODE 0 (LEAF 1) (LEAF 2))))
+
+-- ==================== Problem 5: foldListTree ====================
+
+test_foldListTree_singleLeaf :: Test
+test_foldListTree_singleLeaf = TestCase (assertEqual "foldListTree single leaf sum"
+    6
+    (foldListTree (+) 0 (ListLEAF [1,2,3])))
+
+test_foldListTree_myListTree :: Test
+test_foldListTree_myListTree = TestCase (assertEqual "foldListTree myListTree sum"
+    77
+    (foldListTree (+) 0 myListTree))
+
+test_foldListTree_max :: Test
+test_foldListTree_max = TestCase (assertEqual "foldListTree max on myListTree"
+    12
+    (foldListTree max 0 myListTree))
+
+test_foldListTree_emptyNode :: Test
+test_foldListTree_emptyNode = TestCase (assertEqual "foldListTree empty ListNODE"
+    0
+    (foldListTree (+) 0 (ListNODE [])))
+
+-- ==================== Test Suite ====================
+
+tests :: Test
+tests = TestList [
+    -- merge2
+    test_merge2_duplicates, test_merge2_emptyFirst, test_merge2_negatives,
+    -- merge2Tail
+    test_merge2Tail_basic, test_merge2Tail_emptyBoth, test_merge2Tail_singletons,
+    -- mergeN
+    test_mergeN_empty, test_mergeN_singleSublist, test_mergeN_fourLists,
+    -- getInRange
+    test_getInRange_allOut, test_getInRange_allIn, test_getInRange_strings,
+    -- countInRange
+    test_countInRange_empty, test_countInRange_allEmpty, test_countInRange_mixed,
+    -- addLengths
+    test_addLengths_yardYard, test_addLengths_inchFoot, test_addLengths_yardFoot,
+    -- addAllLengths
+    test_addAllLengths_empty, test_addAllLengths_emptySublist, test_addAllLengths_mixed,
+    -- sumTree
+    test_sumTree_singleLeaf, test_sumTree_myTree, test_sumTree_symmetric,
+    -- createSumTree
+    test_createSumTree_leaf, test_createSumTree_myTree, test_createSumTree_simple,
+    -- foldListTree
+    test_foldListTree_singleLeaf, test_foldListTree_myListTree,
+    test_foldListTree_max, test_foldListTree_emptyNode
+    ]
+
+main :: IO ()
+main = do
+    _ <- runTestTT tests
+    return ()
+A few things to double-check before submitting:
+test_foldListTree_myListTree — verify the expected sum manually: 1+2+3+4+5+6+7+8+9+10+11+12 = 77 ✓
+test_sumTree_myTree — leaves are 2, 3, 4, 5, 6 → sum = 20 ✓
+test_createSumTree_myTree — left subtree leaves sum: 2 + (3+4) = 9, right: 5+6 = 11, total = 20 ✓
+Run with runTestTT tests in GHCi. You're in good shape!HW2SampleTests.hshsFirstly, these are the sample tests already given. So just merge those and make sure we're getting some edge cases7:00 PMLet me read the sample tests file first.Viewed 2 filesViewed 2 filesReading the sample tests fileReading the skill for docx to check if relevantDoneNow I have what I need. Let me create the merged test file.Created a file, read a fileCreated a file, read a fileCreating merged HW2Tests.hs with sample tests + additional edge case testsHW2Tests.hsPresented fileDoneA few things to note about the merged file:
+What's included: All 14 original sample tests are preserved exactly, plus 2–3 additional tests per subproblem covering edge cases.
+Key edge cases added:
+
+merge2/merge2Tail — empty lists, all-duplicate inputs, negative numbers, and a direct comparison between the two to confirm they produce identical output
+mergeN — empty list of lists, single sublist, a sublist that's itself empty mid-merge
+getInRange — empty input, string type (tests the Ord a generality), boundary exclusion confirmed
+countInRange — fully empty nested list, all-empty sublists, the [[1,5],[1],[5],[]] → 0 case from the assignment prompt
+addLengths/addAllLengths — zero base, empty sublists, all unit combinations
+sumTree/createSumTree — single LEAF, your myTree, a minimal two-leaf tree
+foldListTree — single ListLEAF, empty ListNODE, your myListTree with both (+) and max
+
+One thing to verify manually before submitting: p5_test5 expects foldListTree (+) 0 myListTree = 78 (1+2+...+12 = 78). Double-check that matches your myListTree definition.Hw2testsHS DownloadOmg don't judge me I forgot how to run these7:08 PMNo judgment at all, happens to everyone! Here's how to run them:
+In GHCi (interactive):
+ghci HW2Tests.hs
+run
+That's it — run is the shortcut defined at the bottom of the file.
+Or from the command line directly:
+runghc HW2Tests.hs
+Make sure HW2.hs and HW2Tests.hs are in the same folder when you run it, otherwise GHCi won't be able to find the HW2 module it imports.
+If you get a "could not find HUnit" error, install it first:
+cabal install HUnitPS C:\Users\azant\Documents\School\CptS_355\Assignments\Haskell\Assignment-2> ghci HW2Tests.hs
+Loaded package environment from C:\Users\azant\AppData\Roaming\ghc\x86_64-mingw32-9.8.2\environments\default
+GHCi, version 9.8.2: https://www.haskell.org/ghc/  :? for help
+[1 of 2] Compiling HW2              ( HW2.hs, interpreted )
+[2 of 2] Compiling HW2Tests         ( HW2Tests.hs, interpreted )
+Ok, two modules loaded.
+ghci> run
+Cases: 46  Tried: 46  Errors: 0  Failures: 0
+Counts {cases = 46, tried = 46, errors = 0, failures = 0}
+ghci>Show more7:10 PM46/46, clean run! You're all set to submit. Good luck Camille! 🎉woo woot!7:10 PM🎉 Go submit it!
